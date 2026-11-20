@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import base64
 import json
+import re
 from collections import Counter
 from datetime import UTC, datetime
 from typing import Any
@@ -189,7 +190,7 @@ class OpenTargetsService:
         resolved_from = None
         if disease_id is None:
             hits = await self._map(term, "disease")
-            us = term.replace("ae", "e").replace("oe", "e")  # haem-, oesophag-, -aemia
+            us = re.sub(r"(?i)ae|oe", "e", term)  # haem-, Oesophag-, -aemia
             if not hits and us != term:
                 hits = await self._map(us, "disease")
             if not hits:

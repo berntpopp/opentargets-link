@@ -139,10 +139,11 @@ async def test_foreign_disease_ids_point_to_mondo(
     assert "genefoundry" in info.value.extra["hint"] and "name" in info.value.extra["hint"]
 
 
-async def test_british_spelling_falls_back_to_us(ot_service: OpenTargetsService) -> None:
-    p = await ot_service.search_disease_targets("oesophageal melanoma", limit=1)
+@pytest.mark.parametrize("name", ["oesophageal melanoma", "Oesophageal melanoma"])
+async def test_british_spelling_falls_back_to_us(ot_service: OpenTargetsService, name: str) -> None:
+    p = await ot_service.search_disease_targets(name, limit=1)
     assert p["disease"]["id"] == MELANOMA
-    assert p["disease"]["resolved_from"] == "oesophageal melanoma"
+    assert p["disease"]["resolved_from"] == name
 
 
 async def test_unknown_disease_is_not_found(ot_service: OpenTargetsService) -> None:
