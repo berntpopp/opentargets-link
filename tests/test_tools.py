@@ -76,6 +76,13 @@ async def test_off_allowlist_datasource_is_invalid_input_with_allowed_values(fac
     assert (
         "intogen" in body["allowed_values"] and "cancer_gene_census" not in body["allowed_values"]
     )
+    assert "not served" in body["message"] and "COSMIC" in body["message"]
+
+
+async def test_unknown_datasource_gets_no_exclusion_reason(facade: Any) -> None:
+    args = {"disease": "MONDO_0005105", "datasource": "zzz"}
+    body = (await _raw(facade, "search_disease_targets", args)).structured_content
+    assert body["error_code"] == "invalid_input" and "not served" not in body["message"]
 
 
 async def test_over_cap_limit_suggests_the_clamped_call(facade: Any) -> None:

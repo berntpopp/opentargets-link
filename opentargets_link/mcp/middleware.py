@@ -21,6 +21,7 @@ from fastmcp.tools import ToolResult
 from mcp.types import CallToolRequestParams, TextContent
 from pydantic import ValidationError
 
+from opentargets_link.datasources import EXCLUDED
 from opentargets_link.mcp._sanitize import sanitize_message
 from opentargets_link.mcp.arg_help import (
     corrected_value,
@@ -115,6 +116,9 @@ class ArgValidationMiddleware(Middleware):
             suggestion=suggestion,
             constraints=constraints,
         )
+        reason = EXCLUDED.get(str(arguments.get(loc))) if loc == "datasource" else None
+        if reason:  # an excluded source: say why, not just "must be one of"
+            envelope["message"] += f" `{arguments[loc]}` is not served: {reason}."
         if constraints is not None:
             fixed = corrected_value(loc, arguments.get(loc), field_schema)
             # Echo only real parameters, and only when nothing in them needs sanitising.
