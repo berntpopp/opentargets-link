@@ -1,0 +1,17 @@
+{
+ "data": {
+  "mapIds": {
+   "mappings": [
+    {
+     "term": "HER2",
+     "hits": [
+      {
+       "id": "ENSG00000141736",
+       "name": "ERBB2"
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

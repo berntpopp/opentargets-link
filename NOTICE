@@ -1,0 +1,34 @@
+opentargets-link
+Copyright (c) opentargets-link contributors. Code licensed under the MIT licence (see LICENSE).
+
+Data
+----
+opentargets-link stores no data snapshot. It queries the Open Targets Platform
+(https://platform.opentargets.org, Open Targets / EMBL-EBI / Wellcome Sanger Institute) live
+over its public GraphQL API (https://api.platform.opentargets.org/api/v4/graphql).
+
+Open Targets Platform data are marked with CC0 1.0 (public domain dedication); Open Targets
+asks users to cite its latest publication
+(https://platform-docs.opentargets.org/licence, verified 2026-11-20):
+
+  Buniello A, et al. Open Targets Platform: facilitating
+  therapeutic hypotheses building in drug discovery. Nucleic Acids Res.
+  2025;53(D1):D1467-D1475. doi:10.1093/nar/gkae1128. PMID: 39657122.
+
+Per-source terms listed by Open Targets that apply to what this server serves:
+  - ChEMBL (drugs, mechanisms of action, clinical precedence): CC BY-SA 3.0.
+    Attribution: ChEMBL, EMBL-EBI (https://www.ebi.ac.uk/chembl/). Share-alike applies to
+    redistributed drug/mechanism data.
+  - IntOGen: CC0 1.0. ClinGen: CC0 1.0. Orphanet, UniProt, Reactome, Expression Atlas,
+    IMPC/PhenoDigm: CC BY 4.0. ClinVar (via EVA), Gene2Phenotype, GWAS Catalog: EMBL-EBI
+    terms of use.
+
+Not served (datasource allowlist, opentargets_link/datasources.py): Cancer Gene Census
+(COSMIC), Genomics England PanelApp and Project Score (all "commercial use for Open Targets",
+a grant to Open Targets users), Europe PMC text mining (mixed CC BY / CC BY-NC), and Cancer
+Genome Interpreter biomarkers (held: licence recorded as CC BY 4.0 by Open Targets and
+CC BY-NC 4.0 by DGIdb). COSMIC cancer hallmarks are never queried.
+
+Research use only. Not for clinical decision support, diagnosis or treatment. The output
+of this server is not a clinical actionability report: absence of Open Targets data is not
+evidence that a target is not druggable or unrelated to a disease.

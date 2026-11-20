@@ -1,0 +1,137 @@
+{
+ "data": {
+  "target": {
+   "id": "ENSG00000133703",
+   "approvedSymbol": "KRAS",
+   "evidences": {
+    "count": 3,
+    "cursor": null,
+    "rows": [
+     {
+      "id": "68a2f9c9f0ec06650ea27f8422e538da6d3903e6",
+      "datasourceId": "gene_burden",
+      "datatypeId": "genetic_association",
+      "score": 0.41807026088796345,
+      "disease": {
+       "id": "MONDO_0005059",
+       "name": "leukemia"
+      },
+      "diseaseFromSource": "Leukemia",
+      "cohortId": "UK Biobank 450k/All of Us/MGB",
+      "cohortShortName": null,
+      "significantDriverMethods": [],
+      "resourceScore": 5.742e-10,
+      "mutatedSamples": [],
+      "variant": null,
+      "variantRsId": null,
+      "variantFunctionalConsequence": null,
+      "clinicalSignificances": [],
+      "confidence": null,
+      "alleleOrigins": [],
+      "allelicRequirements": [],
+      "studyId": null,
+      "oddsRatio": 12.27,
+      "oddsRatioConfidenceIntervalLower": 5.67,
+      "oddsRatioConfidenceIntervalUpper": 26.57,
+      "beta": null,
+      "betaConfidenceIntervalLower": null,
+      "betaConfidenceIntervalUpper": null,
+      "pValueMantissa": 5.742,
+      "pValueExponent": -10,
+      "statisticalMethod": "LOF + missense0.5 (MAF<0.001%)",
+      "ancestry": null,
+      "studySampleSize": 748879,
+      "projectId": "CVDI Human Disease Portal",
+      "clinicalStage": null,
+      "drug": null,
+      "literature": [
+       "39210047"
+      ]
+     },
+     {
+      "id": "26cf711e7dc08151c46663445b3d992613f14bad",
+      "datasourceId": "gene_burden",
+      "datatypeId": "genetic_association",
+      "score": 0.26652485295946393,
+      "disease": {
+       "id": "MONDO_0004805",
+       "name": "leukocyte disorder"
+      },
+      "diseaseFromSource": "Diseases of white blood cells",
+      "cohortId": "UK Biobank 450k/All of Us/MGB",
+      "cohortShortName": null,
+      "significantDriverMethods": [],
+      "resourceScore": 6.021e-08,
+      "mutatedSamples": [],
+      "variant": null,
+      "variantRsId": null,
+      "variantFunctionalConsequence": null,
+      "clinicalSignificances": [],
+      "confidence": null,
+      "alleleOrigins": [],
+      "allelicRequirements": [],
+      "studyId": null,
+      "oddsRatio": 4.7,
+      "oddsRatioConfidenceIntervalLower": 2.65,
+      "oddsRatioConfidenceIntervalUpper": 8.3,
+      "beta": null,
+      "betaConfidenceIntervalLower": null,
+      "betaConfidenceIntervalUpper": null,
+      "pValueMantissa": 6.021,
+      "pValueExponent": -8,
+      "statisticalMethod": "LOF + missense0.5 (MAF<0.001%)",
+      "ancestry": null,
+      "studySampleSize": 748879,
+      "projectId": "CVDI Human Disease Portal",
+      "clinicalStage": null,
+      "drug": null,
+      "literature": [
+       "39210047"
+      ]
+     },
+     {
+      "id": "5272a632bd763814c244a75b4911db70a0a3bd0f",
+      "datasourceId": "gene_burden",
+      "datatypeId": "genetic_association",
+      "score": 0.25,
+      "disease": {
+       "id": "MONDO_0005059",
+       "name": "leukemia"
+      },
+      "diseaseFromSource": "Leukemia",
+      "cohortId": "UK Biobank 450k/All of Us/MGB",
+      "cohortShortName": null,
+      "significantDriverMethods": [],
+      "resourceScore": 3.701e-07,
+      "mutatedSamples": [],
+      "variant": null,
+      "variantRsId": null,
+      "variantFunctionalConsequence": null,
+      "clinicalSignificances": [],
+      "confidence": null,
+      "alleleOrigins": [],
+      "allelicRequirements": [],
+      "studyId": null,
+      "oddsRatio": 3.85,
+      "oddsRatioConfidenceIntervalLower": 3.85,
+      "oddsRatioConfidenceIntervalUpper": 16.61,
+      "beta": null,
+      "betaConfidenceIntervalLower": null,
+      "betaConfidenceIntervalUpper": null,
+      "pValueMantissa": 3.701,
+      "pValueExponent": -7,
+      "statisticalMethod": "LOF + missense0.5 (MAF<0.1%)",
+      "ancestry": null,
+      "studySampleSize": 748879,
+      "projectId": "CVDI Human Disease Portal",
+      "clinicalStage": null,
+      "drug": null,
+      "literature": [
+       "39210047"
+      ]
+     }
+    ]
+   }
+  }
+ }
+}

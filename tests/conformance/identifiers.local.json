@@ -1,0 +1,8 @@
+{
+  "params": {
+    "resolve_target.query": "gene",
+    "get_target_tractability.target": "gene",
+    "get_drug_candidates.target": "gene",
+    "get_target_disease_evidence.target": "gene"
+  }
+}

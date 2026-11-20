@@ -1,0 +1,17 @@
+{
+ "data": {
+  "mapIds": {
+   "mappings": [
+    {
+     "term": "melanoma",
+     "hits": [
+      {
+       "id": "MONDO_0005105",
+       "name": "melanoma"
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

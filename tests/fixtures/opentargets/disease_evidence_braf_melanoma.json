@@ -1,0 +1,510 @@
+{
+ "data": {
+  "disease": {
+   "id": "MONDO_0005105",
+   "name": "melanoma",
+   "evidences": {
+    "count": 287,
+    "cursor": "eyJpbmRleCI6MSwic2l6ZSI6MTB9",
+    "rows": [
+     {
+      "id": "0379c4e7d7bdecf896a8d0f4a381d234d57c9e8a",
+      "datasourceId": "intogen",
+      "datatypeId": "somatic_mutation",
+      "score": 1,
+      "disease": {
+       "id": "MONDO_0005012",
+       "name": "cutaneous melanoma"
+      },
+      "diseaseFromSource": "Cutaneous Melanoma",
+      "cohortId": "HARTWIG_WGS_SKCM_2023",
+      "cohortShortName": "HARTWIG_WGS_SKCM_2023",
+      "significantDriverMethods": [
+       "oncodrivefml",
+       "oncodriveclustl",
+       "dndscv",
+       "smregions",
+       "cbase",
+       "mutpanning",
+       "hotmaps"
+      ],
+      "resourceScore": 7.286619095263328e-52,
+      "mutatedSamples": [
+       {
+        "functionalConsequence": {
+         "id": "SO:0002053",
+         "label": "gain_of_function_variant"
+        },
+        "numberSamplesTested": 152,
+        "numberMutatedSamples": 152
+       }
+      ],
+      "variant": null,
+      "variantRsId": null,
+      "variantFunctionalConsequence": null,
+      "clinicalSignificances": [],
+      "confidence": null,
+      "alleleOrigins": [],
+      "allelicRequirements": [],
+      "studyId": null,
+      "oddsRatio": null,
+      "oddsRatioConfidenceIntervalLower": null,
+      "oddsRatioConfidenceIntervalUpper": null,
+      "beta": null,
+      "betaConfidenceIntervalLower": null,
+      "betaConfidenceIntervalUpper": null,
+      "pValueMantissa": null,
+      "pValueExponent": null,
+      "statisticalMethod": null,
+      "ancestry": null,
+      "studySampleSize": null,
+      "projectId": null,
+      "clinicalStage": null,
+      "drug": null,
+      "literature": []
+     },
+     {
+      "id": "04d06de46d5791e1ae87a6ed0737b68c87fd1c79",
+      "datasourceId": "intogen",
+      "datatypeId": "somatic_mutation",
+      "score": 1,
+      "disease": {
+       "id": "MONDO_0005105",
+       "name": "melanoma"
+      },
+      "diseaseFromSource": "Melanoma",
+      "cohortId": "CBIOP_WXS_CM_VALLEN_2018",
+      "cohortShortName": "CBIOP_WXS_CM_VALLEN_2018",
+      "significantDriverMethods": [
+       "oncodrivefml",
+       "oncodriveclustl",
+       "dndscv",
+       "smregions",
+       "cbase",
+       "mutpanning",
+       "hotmaps"
+      ],
+      "resourceScore": 6.0218504082911276e-55,
+      "mutatedSamples": [
+       {
+        "functionalConsequence": {
+         "id": "SO:0002053",
+         "label": "gain_of_function_variant"
+        },
+        "numberSamplesTested": 70,
+        "numberMutatedSamples": 70
+       }
+      ],
+      "variant": null,
+      "variantRsId": null,
+      "variantFunctionalConsequence": null,
+      "clinicalSignificances": [],
+      "confidence": null,
+      "alleleOrigins": [],
+      "allelicRequirements": [],
+      "studyId": null,
+      "oddsRatio": null,
+      "oddsRatioConfidenceIntervalLower": null,
+      "oddsRatioConfidenceIntervalUpper": null,
+      "beta": null,
+      "betaConfidenceIntervalLower": null,
+      "betaConfidenceIntervalUpper": null,
+      "pValueMantissa": null,
+      "pValueExponent": null,
+      "statisticalMethod": null,
+      "ancestry": null,
+      "studySampleSize": null,
+      "projectId": null,
+      "clinicalStage": null,
+      "drug": null,
+      "literature": [
+       "30150660"
+      ]
+     },
+     {
+      "id": "150c0ffbdecb3433b56b92370fd753d4cab1ff8c",
+      "datasourceId": "intogen",
+      "datatypeId": "somatic_mutation",
+      "score": 1,
+      "disease": {
+       "id": "MONDO_0005105",
+       "name": "melanoma"
+      },
+      "diseaseFromSource": "Melanoma",
+      "cohortId": "ICGC_WGS_MEL_MELA_AU_2019",
+      "cohortShortName": "ICGC_WGS_MEL_MELA_AU_2019",
+      "significantDriverMethods": [
+       "smregions",
+       "mutpanning",
+       "hotmaps"
+      ],
+      "resourceScore": 4.3926046114418004e-30,
+      "mutatedSamples": [
+       {
+        "functionalConsequence": {
+         "id": "SO:0002053",
+         "label": "gain_of_function_variant"
+        },
+        "numberSamplesTested": 22,
+        "numberMutatedSamples": 22
+       }
+      ],
+      "variant": null,
+      "variantRsId": null,
+      "variantFunctionalConsequence": null,
+      "clinicalSignificances": [],
+      "confidence": null,
+      "alleleOrigins": [],
+      "allelicRequirements": [],
+      "studyId": null,
+      "oddsRatio": null,
+      "oddsRatioConfidenceIntervalLower": null,
+      "oddsRatioConfidenceIntervalUpper": null,
+      "beta": null,
+      "betaConfidenceIntervalLower": null,
+      "betaConfidenceIntervalUpper": null,
+      "pValueMantissa": null,
+      "pValueExponent": null,
+      "statisticalMethod": null,
+      "ancestry": null,
+      "studySampleSize": null,
+      "projectId": null,
+      "clinicalStage": null,
+      "drug": null,
+      "literature": [
+       "21930502"
+      ]
+     },
+     {
+      "id": "1aef86c46dc2935b8b4ae6ef0983f75f11ce7299",
+      "datasourceId": "clinical_precedence",
+      "datatypeId": "clinical",
+      "score": 1,
+      "disease": {
+       "id": "MONDO_0005191",
+       "name": "metastatic melanoma"
+      },
+      "diseaseFromSource": "metastatic melanoma",
+      "cohortId": null,
+      "cohortShortName": null,
+      "significantDriverMethods": [],
+      "resourceScore": null,
+      "mutatedSamples": [],
+      "variant": null,
+      "variantRsId": null,
+      "variantFunctionalConsequence": null,
+      "clinicalSignificances": [],
+      "confidence": null,
+      "alleleOrigins": [],
+      "allelicRequirements": [],
+      "studyId": null,
+      "oddsRatio": null,
+      "oddsRatioConfidenceIntervalLower": null,
+      "oddsRatioConfidenceIntervalUpper": null,
+      "beta": null,
+      "betaConfidenceIntervalLower": null,
+      "betaConfidenceIntervalUpper": null,
+      "pValueMantissa": null,
+      "pValueExponent": null,
+      "statisticalMethod": null,
+      "ancestry": null,
+      "studySampleSize": null,
+      "projectId": null,
+      "clinicalStage": "APPROVAL",
+      "drug": {
+       "id": "CHEMBL3301612",
+       "name": "ENCORAFENIB"
+      },
+      "literature": []
+     },
+     {
+      "id": "1da879ae071486ea2be1aeb356f825b637ff8707",
+      "datasourceId": "clinical_precedence",
+      "datatypeId": "clinical",
+      "score": 1,
+      "disease": {
+       "id": "MONDO_0005105",
+       "name": "melanoma"
+      },
+      "diseaseFromSource": "melanoma",
+      "cohortId": null,
+      "cohortShortName": null,
+      "significantDriverMethods": [],
+      "resourceScore": null,
+      "mutatedSamples": [],
+      "variant": null,
+      "variantRsId": null,
+      "variantFunctionalConsequence": null,
+      "clinicalSignificances": [],
+      "confidence": null,
+      "alleleOrigins": [],
+      "allelicRequirements": [],
+      "studyId": null,
+      "oddsRatio": null,
+      "oddsRatioConfidenceIntervalLower": null,
+      "oddsRatioConfidenceIntervalUpper": null,
+      "beta": null,
+      "betaConfidenceIntervalLower": null,
+      "betaConfidenceIntervalUpper": null,
+      "pValueMantissa": null,
+      "pValueExponent": null,
+      "statisticalMethod": null,
+      "ancestry": null,
+      "studySampleSize": null,
+      "projectId": null,
+      "clinicalStage": "APPROVAL",
+      "drug": {
+       "id": "CHEMBL3301612",
+       "name": "ENCORAFENIB"
+      },
+      "literature": []
+     },
+     {
+      "id": "1e80d6acd70b63a3155b21933676838909de825a",
+      "datasourceId": "intogen",
+      "datatypeId": "somatic_mutation",
+      "score": 1,
+      "disease": {
+       "id": "MONDO_0005105",
+       "name": "melanoma"
+      },
+      "diseaseFromSource": "Melanoma",
+      "cohortId": "TCGA_WXS_MEL",
+      "cohortShortName": "TCGA_WXS_MEL",
+      "significantDriverMethods": [
+       "oncodrivefml",
+       "oncodriveclustl",
+       "dndscv",
+       "smregions",
+       "cbase",
+       "mutpanning",
+       "hotmaps"
+      ],
+      "resourceScore": 1.4454363163608043e-61,
+      "mutatedSamples": [
+       {
+        "functionalConsequence": {
+         "id": "SO:0002053",
+         "label": "gain_of_function_variant"
+        },
+        "numberSamplesTested": 227,
+        "numberMutatedSamples": 227
+       }
+      ],
+      "variant": null,
+      "variantRsId": null,
+      "variantFunctionalConsequence": null,
+      "clinicalSignificances": [],
+      "confidence": null,
+      "alleleOrigins": [],
+      "allelicRequirements": [],
+      "studyId": null,
+      "oddsRatio": null,
+      "oddsRatioConfidenceIntervalLower": null,
+      "oddsRatioConfidenceIntervalUpper": null,
+      "beta": null,
+      "betaConfidenceIntervalLower": null,
+      "betaConfidenceIntervalUpper": null,
+      "pValueMantissa": null,
+      "pValueExponent": null,
+      "statisticalMethod": null,
+      "ancestry": null,
+      "studySampleSize": null,
+      "projectId": null,
+      "clinicalStage": null,
+      "drug": null,
+      "literature": [
+       "24071849"
+      ]
+     },
+     {
+      "id": "23d11bb40103dd0b336826edc6824b898ef1d7c1",
+      "datasourceId": "intogen",
+      "datatypeId": "somatic_mutation",
+      "score": 1,
+      "disease": {
+       "id": "MONDO_0005105",
+       "name": "melanoma"
+      },
+      "diseaseFromSource": "Melanoma",
+      "cohortId": "PCAWG_WGS_SKIN_MELANOMA",
+      "cohortShortName": "PCAWG_WGS_SKIN_MELANOMA",
+      "significantDriverMethods": [
+       "oncodrivefml",
+       "oncodriveclustl",
+       "dndscv",
+       "smregions",
+       "cbase",
+       "mutpanning",
+       "hotmaps"
+      ],
+      "resourceScore": 1.0919846412142059e-41,
+      "mutatedSamples": [
+       {
+        "functionalConsequence": {
+         "id": "SO:0002053",
+         "label": "gain_of_function_variant"
+        },
+        "numberSamplesTested": 52,
+        "numberMutatedSamples": 52
+       }
+      ],
+      "variant": null,
+      "variantRsId": null,
+      "variantFunctionalConsequence": null,
+      "clinicalSignificances": [],
+      "confidence": null,
+      "alleleOrigins": [],
+      "allelicRequirements": [],
+      "studyId": null,
+      "oddsRatio": null,
+      "oddsRatioConfidenceIntervalLower": null,
+      "oddsRatioConfidenceIntervalUpper": null,
+      "beta": null,
+      "betaConfidenceIntervalLower": null,
+      "betaConfidenceIntervalUpper": null,
+      "pValueMantissa": null,
+      "pValueExponent": null,
+      "statisticalMethod": null,
+      "ancestry": null,
+      "studySampleSize": null,
+      "projectId": null,
+      "clinicalStage": null,
+      "drug": null,
+      "literature": [
+       "32025007"
+      ]
+     },
+     {
+      "id": "31c2ed62aa178d2db39ba429c5bea93590a7b98b",
+      "datasourceId": "clinical_precedence",
+      "datatypeId": "clinical",
+      "score": 1,
+      "disease": {
+       "id": "MONDO_0005105",
+       "name": "melanoma"
+      },
+      "diseaseFromSource": "melanoma",
+      "cohortId": null,
+      "cohortShortName": null,
+      "significantDriverMethods": [],
+      "resourceScore": null,
+      "mutatedSamples": [],
+      "variant": null,
+      "variantRsId": null,
+      "variantFunctionalConsequence": null,
+      "clinicalSignificances": [],
+      "confidence": null,
+      "alleleOrigins": [],
+      "allelicRequirements": [],
+      "studyId": null,
+      "oddsRatio": null,
+      "oddsRatioConfidenceIntervalLower": null,
+      "oddsRatioConfidenceIntervalUpper": null,
+      "beta": null,
+      "betaConfidenceIntervalLower": null,
+      "betaConfidenceIntervalUpper": null,
+      "pValueMantissa": null,
+      "pValueExponent": null,
+      "statisticalMethod": null,
+      "ancestry": null,
+      "studySampleSize": null,
+      "projectId": null,
+      "clinicalStage": "APPROVAL",
+      "drug": {
+       "id": "CHEMBL2028663",
+       "name": "DABRAFENIB"
+      },
+      "literature": []
+     },
+     {
+      "id": "456eb9583f76749ac928ce0b6fb302c8cbe8f246",
+      "datasourceId": "clinical_precedence",
+      "datatypeId": "clinical",
+      "score": 1,
+      "disease": {
+       "id": "MONDO_0005105",
+       "name": "melanoma"
+      },
+      "diseaseFromSource": "melanoma",
+      "cohortId": null,
+      "cohortShortName": null,
+      "significantDriverMethods": [],
+      "resourceScore": null,
+      "mutatedSamples": [],
+      "variant": null,
+      "variantRsId": null,
+      "variantFunctionalConsequence": null,
+      "clinicalSignificances": [],
+      "confidence": null,
+      "alleleOrigins": [],
+      "allelicRequirements": [],
+      "studyId": null,
+      "oddsRatio": null,
+      "oddsRatioConfidenceIntervalLower": null,
+      "oddsRatioConfidenceIntervalUpper": null,
+      "beta": null,
+      "betaConfidenceIntervalLower": null,
+      "betaConfidenceIntervalUpper": null,
+      "pValueMantissa": null,
+      "pValueExponent": null,
+      "statisticalMethod": null,
+      "ancestry": null,
+      "studySampleSize": null,
+      "projectId": null,
+      "clinicalStage": "APPROVAL",
+      "drug": {
+       "id": "CHEMBL2028663",
+       "name": "DABRAFENIB"
+      },
+      "literature": []
+     },
+     {
+      "id": "4c1d8aed46d65db340ab2671bc6f884cb76d4468",
+      "datasourceId": "clinical_precedence",
+      "datatypeId": "clinical",
+      "score": 1,
+      "disease": {
+       "id": "MONDO_0005191",
+       "name": "metastatic melanoma"
+      },
+      "diseaseFromSource": "metastatic melanoma",
+      "cohortId": null,
+      "cohortShortName": null,
+      "significantDriverMethods": [],
+      "resourceScore": null,
+      "mutatedSamples": [],
+      "variant": null,
+      "variantRsId": null,
+      "variantFunctionalConsequence": null,
+      "clinicalSignificances": [],
+      "confidence": null,
+      "alleleOrigins": [],
+      "allelicRequirements": [],
+      "studyId": null,
+      "oddsRatio": null,
+      "oddsRatioConfidenceIntervalLower": null,
+      "oddsRatioConfidenceIntervalUpper": null,
+      "beta": null,
+      "betaConfidenceIntervalLower": null,
+      "betaConfidenceIntervalUpper": null,
+      "pValueMantissa": null,
+      "pValueExponent": null,
+      "statisticalMethod": null,
+      "ancestry": null,
+      "studySampleSize": null,
+      "projectId": null,
+      "clinicalStage": "PHASE_4",
+      "drug": {
+       "id": "CHEMBL1229517",
+       "name": "VEMURAFENIB"
+      },
+      "literature": [
+       "30053905"
+      ]
+     }
+    ]
+   }
+  }
+ }
+}
