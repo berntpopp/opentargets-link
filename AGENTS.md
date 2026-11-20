@@ -14,7 +14,8 @@ and clinical candidates, disease→target association ranking and target–disea
 one backend in the GeneFoundry `-link` fleet, federated behind `genefoundry-router` under the
 namespace **`opentargets`**. Scaffolding (MCP plane, Docker, CI) was cloned from
 `pgscatalog-link` via `civic-link`. Do not federate `opentargets/platform-mcp` (raw GraphQL
-passthrough). Tracking issue: TRACKING_ISSUE.
+passthrough). Tracking issue:
+https://github.com/berntpopp/genefoundry-router/issues/349.
 
 ## Two planes (non-negotiable boundary)
 

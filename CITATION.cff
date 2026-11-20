@@ -21,8 +21,8 @@ url: https://genefoundry.org
 keywords:
 - bioinformatics
 - cancer
-- drug-discovery
 - claude
+- drug-discovery
 - fastmcp
 - genefoundry
 - genomics
@@ -30,6 +30,6 @@ keywords:
 - mcp
 - mcp-server
 - model-context-protocol
-- precision-oncology
 - open-targets
+- precision-oncology
 date-released: '2026-11-20'
