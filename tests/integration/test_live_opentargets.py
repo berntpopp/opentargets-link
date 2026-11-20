@@ -77,3 +77,13 @@ async def test_live_braf_acceptance(service: OpenTargetsService) -> None:
     sources = {e["datasource_id"] for e in evidence["evidence"]}
     assert "intogen" in sources and "cancer_gene_census" not in sources
     assert "filtered_out" not in evidence  # upstream honoured the datasource allowlist
+
+
+async def test_live_cursor_pages_to_the_end(service: OpenTargetsService) -> None:
+    """Guards the decoded cursor format: 8 IntOGen rows page 5 + 3, then stop."""
+    args = {"disease": MELANOMA, "datasource": "intogen", "limit": 5}
+    first = await service.get_target_disease_evidence(BRAF, **args)  # type: ignore[arg-type]
+    assert first["truncated"] and first["next_cursor"]
+    last = await service.get_target_disease_evidence(BRAF, **args, cursor=first["next_cursor"])  # type: ignore[arg-type]
+    assert first["returned"] + last["returned"] == first["total"]
+    assert not last["truncated"] and last["next_cursor"] is None

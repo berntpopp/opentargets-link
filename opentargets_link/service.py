@@ -71,19 +71,24 @@ def _limit(limit: int, maximum: int, offset: int = 0) -> None:
         raise InvalidInputError("`offset` must be >= 0.", field="offset")
 
 
-def _more(cursor: Any, total: int) -> bool:
-    """Whether rows remain after this page (Open Targets returns a cursor on the last page too).
+def _position(cursor: Any) -> int | None:
+    """Rows before the page a cursor points at, or None if it is not an Open Targets cursor.
 
-    ponytail: reads the cursor's undocumented base64 ``{"index", "size"}``; if that format
-    changes we fall back to "a cursor means more" (never hides rows, may offer an empty page).
+    ponytail: reads the cursor's undocumented base64 ``{"index", "size"}`` (Open Targets
+    answers any other string with page one, so we must check). If upstream changes the
+    format, the live paging test fails and this decoder needs updating.
     """
-    if not isinstance(cursor, str):
-        return False
     try:
-        pos = json.loads(base64.b64decode(cursor))
-        return int(pos["index"]) * int(pos["size"]) < total
+        pos = json.loads(base64.b64decode(cursor, validate=True))
+        return int(pos["index"]) * int(pos["size"])
     except ValueError, KeyError, TypeError:
-        return True
+        return None
+
+
+def _more(cursor: Any, total: int) -> bool:
+    """Whether rows remain after this page (Open Targets returns a cursor on the last page too)."""
+    pos = _position(cursor) if isinstance(cursor, str) else None
+    return pos is not None and pos < total
 
 
 class OpenTargetsService:
@@ -363,7 +368,7 @@ class OpenTargetsService:
     ) -> dict[str, Any]:
         """Evidence rows linking a target to a disease (or to any disease) from served sources."""
         _limit(limit, MAX_LIMIT)
-        if cursor is not None and not CURSOR.fullmatch(cursor):
+        if cursor is not None and (not CURSOR.fullmatch(cursor) or _position(cursor) is None):
             raise InvalidInputError(
                 "`cursor` must be the `next_cursor` of a previous call.", field="cursor"
             )

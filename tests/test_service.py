@@ -196,6 +196,15 @@ async def test_bad_cursor_names_the_parameter(ot_service: OpenTargetsService) ->
     assert info.value.extra["field"] == "cursor"
 
 
+@pytest.mark.parametrize("cursor", ["invalid-cursor", "eyJ4IjoxfQ=="])  # not a page position
+async def test_well_formed_but_foreign_cursor_is_rejected_not_page_one(
+    ot_service: OpenTargetsService, cursor: str
+) -> None:
+    with pytest.raises(InvalidInputError) as info:
+        await ot_service.get_target_disease_evidence(BRAF, disease=MELANOMA, cursor=cursor)
+    assert info.value.extra["field"] == "cursor"
+
+
 async def test_resolve_target_errors_name_query_and_never_loop(
     ot_service: OpenTargetsService,
 ) -> None:
