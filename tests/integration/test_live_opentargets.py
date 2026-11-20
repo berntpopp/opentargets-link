@@ -74,6 +74,10 @@ async def test_live_braf_acceptance(service: OpenTargetsService) -> None:
     drugs = await service.get_drug_candidates("BRAF", disease="melanoma", limit=20)
     assert {"VEMURAFENIB", "DABRAFENIB"} <= {d["drug_name"] for d in drugs["drug_candidates"]}
     assert drugs["parent_drugs_total"] < drugs["total"]  # dabrafenib mesylate folds into dabrafenib
+    ranked = await service.search_disease_targets(MELANOMA, limit=1)  # orderByScore "score"
+    assert ranked["ranked_by"] == "score" and ranked["targets"]
+    uk = await service.search_disease_targets("Oesophageal carcinoma", limit=1)
+    assert uk["disease"]["resolved_from"] == "Oesophageal carcinoma"
     evidence = await service.get_target_disease_evidence("BRAF", disease=MELANOMA, limit=50)
     sources = {e["datasource_id"] for e in evidence["evidence"]}
     assert "intogen" in sources and "cancer_gene_census" not in sources
