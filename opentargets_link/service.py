@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import base64
 import json
+from collections import Counter
 from datetime import UTC, datetime
 from typing import Any
 
@@ -287,6 +288,7 @@ class OpenTargetsService:
         dz = await self._disease(disease) if disease is not None else None
         wanted = {dz["id"], *(dz.get("descendants") or [])} if dz else None
         rows: list[dict[str, Any]] = []
+        parents: set[str] = set()  # a salt counts with its parent drug
         conn = raw.get("drugAndClinicalCandidates") or {}
         for node in conn.get("rows") or []:
             matched = None
@@ -300,15 +302,21 @@ class OpenTargetsService:
                     continue
                 matched = list(found.values())
             rows.append(drug_row(node, raw["id"], response_mode, matched))
+            drug = node.get("drug") or {}
+            parents.add(str((drug.get("parentMolecule") or {}).get("id") or drug.get("id")))
         rows.sort(key=lambda r: (stage_rank(r["max_clinical_stage_for_target"]), r["drug_name"]))
         page = rows[offset : offset + limit]
         payload: dict[str, Any] = {
             "target": self._target_block(raw, resolved_from),
             "drug_candidates": page,
             **page_block(total=len(rows), returned=len(page), limit=limit, offset=offset),
+            "parent_drugs_total": len(parents),
+            "approved_total": sum(r["approved"] for r in rows),
+            "stage_counts": dict(Counter(r["max_clinical_stage_for_target"] for r in rows)),
             "licence_note": "Drug and mechanism data derive from ChEMBL (CC BY-SA 3.0).",
-            "stage_note": STAGE_NOTE,
         }
+        if offset == 0:  # explained once, not on every page
+            payload["stage_note"] = STAGE_NOTE
         if dz:
             payload["disease"] = self._disease_block(dz)
             payload["disease_scope"] = "this disease and its descendants"

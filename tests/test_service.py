@@ -256,6 +256,12 @@ def test_post_approval_stages_rank_and_read_as_approved() -> None:
 async def test_drug_payload_explains_stages(ot_service: OpenTargetsService) -> None:
     p = await ot_service.get_drug_candidates(BRAF, limit=5)
     assert "PHASE_4" in p["stage_note"] and "Salt" in p["stage_note"]
+    assert sum(p["stage_counts"].values()) == p["total"] == 18  # over every row, not the page
+    assert p["approved_total"] == sum(
+        n for s, n in p["stage_counts"].items() if s in {"APPROVAL", "PHASE_4", "WITHDRAWAL"}
+    )
+    later = await ot_service.get_drug_candidates(BRAF, limit=5, offset=5)
+    assert "stage_note" not in later and later["stage_counts"] == p["stage_counts"]
 
 
 def test_gwas_credible_set_rows_carry_study_lead_variant_and_p_value() -> None:
