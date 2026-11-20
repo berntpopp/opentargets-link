@@ -1,0 +1,13 @@
+{
+ "errors": [
+  {
+   "message": "Variable '$size' expected value of type 'Int!' but got: \"x\". Reason: Int value expected (line 2, column 44):\nquery DiseaseTargets($disease_id: String!, $size: Int!, $datasources: [DatasourceSettingsInput!]) {\n                                           ^",
+   "locations": [
+    {
+     "line": 2,
+     "column": 44
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,54 @@
+{
+ "data": {
+  "target": {
+   "id": "ENSG00000157764",
+   "approvedSymbol": "BRAF",
+   "approvedName": "B-Raf proto-oncogene, serine/threonine kinase",
+   "biotype": "protein_coding",
+   "genomicLocation": {
+    "chromosome": "7",
+    "start": 140719327,
+    "end": 140925199,
+    "strand": "NEGATIVE"
+   },
+   "symbolSynonyms": [
+    {
+     "label": "BRAF"
+    },
+    {
+     "label": "BRAF1"
+    },
+    {
+     "label": "RAFB1"
+    },
+    {
+     "label": "BRAF1"
+    },
+    {
+     "label": "BRAF-1"
+    },
+    {
+     "label": "B-RAF1"
+    },
+    {
+     "label": "B-raf"
+    },
+    {
+     "label": "BRAF-1"
+    },
+    {
+     "label": "BRAF1"
+    },
+    {
+     "label": "NS7"
+    },
+    {
+     "label": "RAFB1"
+    },
+    {
+     "label": "BRAF"
+    }
+   ]
+  }
+ }
+}

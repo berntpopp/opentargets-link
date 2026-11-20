@@ -1,0 +1,41 @@
+name: Upstream drift
+
+# Live schema-contract alarm: every fixed GraphQL document must still validate against the
+# Open Targets Platform, and meta.dataVersion must equal TESTED_DATA_VERSION. A new quarterly
+# release or a vanished field turns this red; re-verify the queries and bump the constant.
+on:
+  schedule:
+    - cron: "29 5 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  live:
+    name: Live Open Targets contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      UV_PYTHON: "3.14"
+      OPENTARGETS_LINK_LIVE_INTEGRATION: "1"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Python
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.14"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          enable-cache: true
+          version: "0.8.7"
+
+      - name: Install dependencies
+        run: uv sync --group dev --frozen
+
+      - name: Run live integration tests
+        run: make test-integration

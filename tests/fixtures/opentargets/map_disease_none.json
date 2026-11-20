@@ -1,0 +1,12 @@
+{
+ "data": {
+  "mapIds": {
+   "mappings": [
+    {
+     "term": "zzzz not a disease",
+     "hits": []
+    }
+   ]
+  }
+ }
+}

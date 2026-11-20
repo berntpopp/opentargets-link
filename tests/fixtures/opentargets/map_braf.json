@@ -1,0 +1,17 @@
+{
+ "data": {
+  "mapIds": {
+   "mappings": [
+    {
+     "term": "BRAF",
+     "hits": [
+      {
+       "id": "ENSG00000157764",
+       "name": "BRAF"
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

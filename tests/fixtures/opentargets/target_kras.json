@@ -1,0 +1,96 @@
+{
+ "data": {
+  "target": {
+   "id": "ENSG00000133703",
+   "approvedSymbol": "KRAS",
+   "approvedName": "KRas proto-oncogene, GTPase",
+   "biotype": "protein_coding",
+   "genomicLocation": {
+    "chromosome": "12",
+    "start": 25205246,
+    "end": 25326473,
+    "strand": "NEGATIVE"
+   },
+   "symbolSynonyms": [
+    {
+     "label": "KRAS"
+    },
+    {
+     "label": "KRAS2"
+    },
+    {
+     "label": "RASK2"
+    },
+    {
+     "label": "KRAS1"
+    },
+    {
+     "label": "K-Ras4B"
+    },
+    {
+     "label": "'C-K-RAS"
+    },
+    {
+     "label": "C-K-RAS"
+    },
+    {
+     "label": "CFC2"
+    },
+    {
+     "label": "K-RAS2A"
+    },
+    {
+     "label": "K-RAS2B"
+    },
+    {
+     "label": "K-RAS4A"
+    },
+    {
+     "label": "K-RAS4B"
+    },
+    {
+     "label": "K-Ras"
+    },
+    {
+     "label": "K-Ras 2"
+    },
+    {
+     "label": "KI-RAS"
+    },
+    {
+     "label": "KRAS1"
+    },
+    {
+     "label": "KRAS2"
+    },
+    {
+     "label": "NS"
+    },
+    {
+     "label": "NS3"
+    },
+    {
+     "label": "OES"
+    },
+    {
+     "label": "RALD"
+    },
+    {
+     "label": "RALD2"
+    },
+    {
+     "label": "RASK2"
+    },
+    {
+     "label": "c-Ki-ras"
+    },
+    {
+     "label": "c-Ki-ras2"
+    },
+    {
+     "label": "KRAS"
+    }
+   ]
+  }
+ }
+}

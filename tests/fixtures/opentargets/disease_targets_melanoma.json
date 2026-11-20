@@ -1,0 +1,191 @@
+{
+ "data": {
+  "disease": {
+   "id": "MONDO_0005105",
+   "name": "melanoma",
+   "associatedTargets": {
+    "count": 13552,
+    "rows": [
+     {
+      "score": 0.8527892896139926,
+      "target": {
+       "id": "ENSG00000147889",
+       "approvedSymbol": "CDKN2A",
+       "approvedName": "cyclin dependent kinase inhibitor 2A"
+      },
+      "datasourceScores": [
+       {
+        "id": "gene_burden",
+        "score": 0.9622311193416772
+       },
+       {
+        "id": "eva",
+        "score": 0.945122261784739
+       },
+       {
+        "id": "intogen",
+        "score": 0.9039080226037223
+       },
+       {
+        "id": "gwas_credible_sets",
+        "score": 0.7416477473130875
+       },
+       {
+        "id": "impc",
+        "score": 0.7045253794611643
+       },
+       {
+        "id": "gene2phenotype",
+        "score": 0.607930797611621
+       },
+       {
+        "id": "uniprot_literature",
+        "score": 0.607930797611621
+       },
+       {
+        "id": "europepmc",
+        "score": 0.9893603108973517
+       },
+       {
+        "id": "cancer_gene_census",
+        "score": 0.4559480982087158
+       }
+      ]
+     },
+     {
+      "score": 0.7915192934030462,
+      "target": {
+       "id": "ENSG00000157764",
+       "approvedSymbol": "BRAF",
+       "approvedName": "B-Raf proto-oncogene, serine/threonine kinase"
+      },
+      "datasourceScores": [
+       {
+        "id": "clinical_precedence",
+        "score": 0.982134595427167
+       },
+       {
+        "id": "intogen",
+        "score": 0.9231031635563687
+       },
+       {
+        "id": "eva",
+        "score": 0.6991204172533643
+       },
+       {
+        "id": "eva_somatic",
+        "score": 0.18237923928348632
+       },
+       {
+        "id": "europepmc",
+        "score": 0.9984273951479282
+       },
+       {
+        "id": "crispr",
+        "score": 0.43437525605146465
+       },
+       {
+        "id": "cancer_gene_census",
+        "score": 0.607930797611621
+       }
+      ]
+     },
+     {
+      "score": 0.7298408368136853,
+      "target": {
+       "id": "ENSG00000187098",
+       "approvedSymbol": "MITF",
+       "approvedName": "melanocyte inducing transcription factor"
+      },
+      "datasourceScores": [
+       {
+        "id": "gwas_credible_sets",
+        "score": 0.9509755368702497
+       },
+       {
+        "id": "eva",
+        "score": 0.6591624768836803
+       },
+       {
+        "id": "impc",
+        "score": 0.6419573312959812
+       },
+       {
+        "id": "gene_burden",
+        "score": 0.1899783742536316
+       },
+       {
+        "id": "expression_atlas",
+        "score": 0.034887274143463355
+       },
+       {
+        "id": "gene2phenotype",
+        "score": 0.006079307976116211
+       },
+       {
+        "id": "cancer_gene_census",
+        "score": 0.4559480982087158
+       },
+       {
+        "id": "europepmc",
+        "score": 0.9954356041521282
+       },
+       {
+        "id": "crispr",
+        "score": 0.3522257499275503
+       }
+      ]
+     },
+     {
+      "score": 0.7100535649373675,
+      "target": {
+       "id": "ENSG00000169032",
+       "approvedSymbol": "MAP2K1",
+       "approvedName": "mitogen-activated protein kinase kinase 1"
+      },
+      "datasourceScores": [
+       {
+        "id": "clinical_precedence",
+        "score": 0.9780058234987382
+       },
+       {
+        "id": "intogen",
+        "score": 0.7599134970145264
+       },
+       {
+        "id": "europepmc",
+        "score": 0.9470558184419885
+       },
+       {
+        "id": "cancer_gene_census",
+        "score": 0.607930797611621
+       }
+      ]
+     },
+     {
+      "score": 0.696788577412699,
+      "target": {
+       "id": "ENSG00000163599",
+       "approvedSymbol": "CTLA4",
+       "approvedName": "cytotoxic T-lymphocyte associated protein 4"
+      },
+      "datasourceScores": [
+       {
+        "id": "clinical_precedence",
+        "score": 0.9603422512710301
+       },
+       {
+        "id": "gwas_credible_sets",
+        "score": 0.7432881970196296
+       },
+       {
+        "id": "europepmc",
+        "score": 0.9517799384596575
+       }
+      ]
+     }
+    ]
+   }
+  }
+ }
+}

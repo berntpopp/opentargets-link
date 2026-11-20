@@ -1,0 +1,378 @@
+{
+ "data": {
+  "target": {
+   "id": "ENSG00000133703",
+   "approvedSymbol": "KRAS",
+   "approvedName": "KRas proto-oncogene, GTPase",
+   "biotype": "protein_coding",
+   "drugAndClinicalCandidates": {
+    "count": 3,
+    "rows": [
+     {
+      "maxClinicalStage": "APPROVAL",
+      "drug": {
+       "id": "CHEMBL4535757",
+       "name": "SOTORASIB",
+       "drugType": "Small molecule",
+       "maximumClinicalStage": "APPROVAL",
+       "mechanismsOfAction": {
+        "rows": [
+         {
+          "mechanismOfAction": "GTPase KRas inhibitor",
+          "actionType": "INHIBITOR",
+          "targets": [
+           {
+            "id": "ENSG00000133703"
+           }
+          ]
+         }
+        ]
+       }
+      },
+      "diseases": [
+       {
+        "disease": {
+         "id": "MONDO_0005233",
+         "name": "non-small cell lung carcinoma"
+        }
+       },
+       {
+        "disease": {
+         "id": "MONDO_0005233",
+         "name": "non-small cell lung carcinoma"
+        }
+       },
+       {
+        "disease": {
+         "id": "MONDO_0005070",
+         "name": "neoplasm"
+        }
+       },
+       {
+        "disease": {
+         "id": "MONDO_0005233",
+         "name": "non-small cell lung carcinoma"
+        }
+       },
+       {
+        "disease": {
+         "id": "MONDO_0005575",
+         "name": "colorectal cancer"
+        }
+       },
+       {
+        "disease": {
+         "id": "MONDO_0005233",
+         "name": "non-small cell lung carcinoma"
+        }
+       },
+       {
+        "disease": {
+         "id": "MONDO_0008903",
+         "name": "lung cancer"
+        }
+       },
+       {
+        "disease": {
+         "id": "MONDO_0056806",
+         "name": "non-small cell squamous lung carcinoma"
+        }
+       },
+       {
+        "disease": null
+       },
+       {
+        "disease": {
+         "id": "MONDO_0007254",
+         "name": "breast cancer"
+        }
+       },
+       {
+        "disease": {
+         "id": "MONDO_0021040",
+         "name": "pancreatic neoplasm"
+        }
+       },
+       {
+        "disease": {
+         "id": "MONDO_0011962",
+         "name": "endometrial cancer"
+        }
+       },
+       {
+        "disease": {
+         "id": "MONDO_0009831",
+         "name": "malignant pancreatic neoplasm"
+        }
+       },
+       {
+        "disease": {
+         "id": "MONDO_0008170",
+         "name": "ovarian cancer"
+        }
+       },
+       {
+        "disease": {
+         "id": "MONDO_0003060",
+         "name": "biliary tract cancer"
+        }
+       },
+       {
+        "disease": null
+       },
+       {
+        "disease": {
+         "id": "MONDO_0005008",
+         "name": "colorectal adenocarcinoma"
+        }
+       },
+       {
+        "disease": {
+         "id": "MONDO_0004992",
+         "name": "cancer"
+        }
+       },
+       {
+        "disease": {
+         "id": "MONDO_0005233",
+         "name": "non-small cell lung carcinoma"
+        }
+       },
+       {
+        "disease": null
+       },
+       {
+        "disease": {
+         "id": "MONDO_0005070",
+         "name": "neoplasm"
+        }
+       },
+       {
+        "disease": null
+       },
+       {
+        "disease": {
+         "id": "MONDO_0005192",
+         "name": "exocrine pancreatic carcinoma"
+        }
+       },
+       {
+        "disease": null
+       },
+       {
+        "disease": {
+         "id": "MONDO_0021350",
+         "name": "neoplasm of thorax"
+        }
+       },
+       {
+        "disease": {
+         "id": "MONDO_0021211",
+         "name": "brain neoplasm"
+        }
+       },
+       {
+        "disease": {
+         "id": "MONDO_0006047",
+         "name": "pancreatic adenocarcinoma"
+        }
+       },
+       {
+        "disease": {
+         "id": "MONDO_0005233",
+         "name": "non-small cell lung carcinoma"
+        }
+       }
+      ]
+     },
+     {
+      "maxClinicalStage": "APPROVAL",
+      "drug": {
+       "id": "CHEMBL4594350",
+       "name": "ADAGRASIB",
+       "drugType": "Small molecule",
+       "maximumClinicalStage": "APPROVAL",
+       "mechanismsOfAction": {
+        "rows": [
+         {
+          "mechanismOfAction": "GTPase KRas inhibitor",
+          "actionType": "INHIBITOR",
+          "targets": [
+           {
+            "id": "ENSG00000133703"
+           }
+          ]
+         }
+        ]
+       }
+      },
+      "diseases": [
+       {
+        "disease": {
+         "id": "MONDO_0005233",
+         "name": "non-small cell lung carcinoma"
+        }
+       },
+       {
+        "disease": {
+         "id": "MONDO_0005233",
+         "name": "non-small cell lung carcinoma"
+        }
+       },
+       {
+        "disease": {
+         "id": "MONDO_0005070",
+         "name": "neoplasm"
+        }
+       },
+       {
+        "disease": {
+         "id": "MONDO_0005233",
+         "name": "non-small cell lung carcinoma"
+        }
+       },
+       {
+        "disease": null
+       },
+       {
+        "disease": {
+         "id": "MONDO_0005233",
+         "name": "non-small cell lung carcinoma"
+        }
+       },
+       {
+        "disease": {
+         "id": "MONDO_0005575",
+         "name": "colorectal cancer"
+        }
+       },
+       {
+        "disease": null
+       },
+       {
+        "disease": null
+       },
+       {
+        "disease": {
+         "id": "MONDO_0007254",
+         "name": "breast cancer"
+        }
+       },
+       {
+        "disease": {
+         "id": "MONDO_0008903",
+         "name": "lung cancer"
+        }
+       },
+       {
+        "disease": {
+         "id": "MONDO_0005233",
+         "name": "non-small cell lung carcinoma"
+        }
+       },
+       {
+        "disease": null
+       },
+       {
+        "disease": {
+         "id": "MONDO_0005184",
+         "name": "pancreatic ductal adenocarcinoma"
+        }
+       },
+       {
+        "disease": {
+         "id": "MONDO_0003060",
+         "name": "biliary tract cancer"
+        }
+       },
+       {
+        "disease": null
+       },
+       {
+        "disease": null
+       },
+       {
+        "disease": {
+         "id": "MONDO_0021040",
+         "name": "pancreatic neoplasm"
+        }
+       },
+       {
+        "disease": {
+         "id": "MONDO_0009831",
+         "name": "malignant pancreatic neoplasm"
+        }
+       },
+       {
+        "disease": {
+         "id": "MONDO_0005070",
+         "name": "neoplasm"
+        }
+       },
+       {
+        "disease": {
+         "id": "MONDO_0004992",
+         "name": "cancer"
+        }
+       }
+      ]
+     },
+     {
+      "maxClinicalStage": "PHASE_2",
+      "drug": {
+       "id": "CHEMBL23293",
+       "name": "SALIRASIB",
+       "drugType": "Small molecule",
+       "maximumClinicalStage": "PHASE_2",
+       "mechanismsOfAction": {
+        "rows": [
+         {
+          "mechanismOfAction": "RAS inhibitor",
+          "actionType": "INHIBITOR",
+          "targets": [
+           {
+            "id": "ENSG00000174775"
+           },
+           {
+            "id": "ENSG00000213281"
+           },
+           {
+            "id": "ENSG00000133703"
+           }
+          ]
+         }
+        ]
+       }
+      },
+      "diseases": [
+       {
+        "disease": {
+         "id": "MONDO_0008903",
+         "name": "lung cancer"
+        }
+       },
+       {
+        "disease": {
+         "id": "MONDO_0005233",
+         "name": "non-small cell lung carcinoma"
+        }
+       },
+       {
+        "disease": {
+         "id": "MONDO_0021040",
+         "name": "pancreatic neoplasm"
+        }
+       },
+       {
+        "disease": {
+         "id": "MONDO_0009831",
+         "name": "malignant pancreatic neoplasm"
+        }
+       }
+      ]
+     }
+    ]
+   }
+  }
+ }
+}

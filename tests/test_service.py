@@ -1,0 +1,211 @@
+"""OpenTargetsService over recorded Open Targets 26.09 responses (respx, network-free)."""
+
+from __future__ import annotations
+
+import json
+from typing import Any
+
+import httpx
+import pytest
+import respx
+
+from opentargets_link.api.client import GRAPHQL_PATH
+from opentargets_link.exceptions import InvalidInputError, NotFoundError
+from opentargets_link.service import OpenTargetsService
+from tests.conftest import BRAF, KRAS, MELANOMA, load
+
+
+def _sent(router: respx.MockRouter, op: str) -> list[dict[str, Any]]:
+    bodies = [json.loads(c.request.content) for c in router.calls]
+    return [b["variables"] for b in bodies if f"query {op}" in b["query"]]
+
+
+async def test_every_payload_carries_the_ot_data_release(ot_service: OpenTargetsService) -> None:
+    p = await ot_service.resolve_target("BRAF")
+    assert p["data_version"] == "26.09"
+    assert "not a clinical actionability report" in p["disclaimer"]
+
+
+async def test_resolve_target_by_symbol_and_ensembl(ot_service: OpenTargetsService) -> None:
+    by_symbol = (await ot_service.resolve_target("braf"))["target"]
+    assert by_symbol["id"] == BRAF and by_symbol["symbol"] == "BRAF"
+    assert by_symbol["resolved_from"] == "braf"
+    assert by_symbol["location"]["assembly"] == "GRCh38"
+    by_id = (await ot_service.resolve_target(BRAF))["target"]
+    assert by_id["id"] == BRAF and "resolved_from" not in by_id
+
+
+async def test_alias_resolves_and_says_so(ot_service: OpenTargetsService) -> None:
+    hit = await ot_service._target_id("HER2")
+    assert hit == ("ENSG00000141736", "HER2")
+
+
+@pytest.mark.parametrize("value", ["HGNC:1097", "NCBIGene:673", "673"])
+async def test_foreign_gene_ids_point_to_hgnc(ot_service: OpenTargetsService, value: str) -> None:
+    with pytest.raises(InvalidInputError) as info:
+        await ot_service.get_target_tractability(value)
+    extra = info.value.extra
+    assert extra["field"] == "target" and extra["allowed_values"]
+    assert extra["next_commands"][0]["tool"] == "hgnc_resolve_symbol"
+
+
+async def test_unknown_target_is_not_found(ot_service: OpenTargetsService) -> None:
+    with pytest.raises(NotFoundError) as info:
+        await ot_service.resolve_target("NOTAGENE1")
+    assert info.value.extra["field"] == "query"
+    with pytest.raises(NotFoundError):
+        await ot_service.resolve_target("ENSG00000000001")
+
+
+async def test_braf_tractability_has_small_molecule_approved_drug(
+    ot_service: OpenTargetsService,
+) -> None:
+    p = await ot_service.get_target_tractability("BRAF")
+    assert "Approved Drug" in p["tractability"]["SM"]["true"]
+    assert "Approved Drug" in p["tractability"]["AB"]["false"]
+
+
+async def test_braf_melanoma_drug_candidates_include_vemurafenib_and_dabrafenib(
+    ot_service: OpenTargetsService,
+) -> None:
+    p = await ot_service.get_drug_candidates("BRAF", disease="melanoma", limit=20)
+    names = {r["drug_name"] for r in p["drug_candidates"]}
+    assert {"VEMURAFENIB", "DABRAFENIB"} <= names
+    assert p["disease"] == {"id": MELANOMA, "name": "melanoma", "resolved_from": "melanoma"}
+    assert p["total"] < 18  # the disease filter removed drugs never studied in melanoma
+    assert "ARQ-736" not in names
+    stages = [r["max_clinical_stage_for_target"] for r in p["drug_candidates"]]
+    assert stages[0] == "APPROVAL"
+    assert all("clinical_reports" not in r for r in p["drug_candidates"])
+    assert "ChEMBL (CC BY-SA 3.0)" in p["licence_note"]
+
+
+async def test_drug_candidates_page_honestly(ot_service: OpenTargetsService) -> None:
+    first = await ot_service.get_drug_candidates(BRAF, limit=5)
+    assert first["total"] == 18 and first["returned"] == 5 and first["truncated"]
+    last = await ot_service.get_drug_candidates(BRAF, limit=5, offset=15)
+    assert last["returned"] == 3 and not last["truncated"] and last["next_offset"] is None
+
+
+async def test_full_mode_adds_fenced_reports_capped_per_drug(
+    ot_service: OpenTargetsService,
+) -> None:
+    p = await ot_service.get_drug_candidates(KRAS, response_mode="full")
+    row = p["drug_candidates"][0]
+    assert row["clinical_reports_total"] > 3 and len(row["clinical_reports"]) == 3
+    assert row["clinical_reports"][0]["title"]["kind"] == "untrusted_text"
+    assert row["mechanism_of_action"]["kind"] == "untrusted_text"
+
+
+async def test_disease_targets_zero_weight_excluded_sources_and_filter_scores(
+    ot_service: OpenTargetsService, mocked_ot: respx.MockRouter
+) -> None:
+    p = await ot_service.search_disease_targets("MONDO:0005105", limit=5)
+    sent = _sent(mocked_ot, "DiseaseTargets")[0]["datasources"]
+    zeroed = {d["id"] for d in sent if d["weight"] == 0}
+    assert {"cancer_gene_census", "europepmc", "cancer_biomarkers"} <= zeroed
+    braf = next(r for r in p["targets"] if r["symbol"] == "BRAF")
+    assert "intogen" in braf["datasource_scores"]
+    for row in p["targets"]:
+        assert not {"cancer_gene_census", "europepmc", "crispr"} & set(row["datasource_scores"])
+    assert p["total"] > 1000 and p["truncated"]
+
+
+async def test_disease_targets_datasource_filter_is_required(
+    ot_service: OpenTargetsService, mocked_ot: respx.MockRouter
+) -> None:
+    await ot_service.search_disease_targets(MELANOMA, datasource="intogen")
+    sent = _sent(mocked_ot, "DiseaseTargets")[0]["datasources"]
+    assert {"id": "intogen", "weight": 1.0, "propagate": True, "required": True} in sent
+
+
+@pytest.mark.parametrize("value", ["OMIM:155600", "DOID:1909"])
+async def test_foreign_disease_ids_point_to_mondo(
+    ot_service: OpenTargetsService, value: str
+) -> None:
+    with pytest.raises(InvalidInputError) as info:
+        await ot_service.search_disease_targets(value)
+    assert info.value.extra["next_commands"][0]["tool"] == "mondo_resolve_disease"
+
+
+async def test_unknown_disease_is_not_found(ot_service: OpenTargetsService) -> None:
+    with pytest.raises(NotFoundError):
+        await ot_service.search_disease_targets("zzzz not a disease")
+    with pytest.raises(NotFoundError):
+        await ot_service.search_disease_targets("MONDO_9999999")
+
+
+async def test_braf_melanoma_evidence_is_allowlisted_only(
+    ot_service: OpenTargetsService, mocked_ot: respx.MockRouter
+) -> None:
+    p = await ot_service.get_target_disease_evidence("BRAF", disease=MELANOMA)
+    sources = {r["datasource_id"] for r in p["evidence"]}
+    assert "intogen" in sources and "cancer_gene_census" not in sources
+    sent = _sent(mocked_ot, "DiseaseEvidence")[0]["datasource"]
+    assert "cancer_gene_census" not in sent and "europepmc" not in sent
+    assert p["total"] == 287 and p["truncated"] and p["next_cursor"]
+
+
+async def test_excluded_datasource_rows_in_a_response_are_dropped(
+    ot_service: OpenTargetsService, mocked_ot: respx.MockRouter
+) -> None:
+    good = load("disease_evidence_braf_melanoma")
+    cgc = load("disease_evidence_braf_melanoma_cgc")["data"]["disease"]["evidences"]["rows"]
+    good["data"]["disease"]["evidences"]["rows"] += cgc  # upstream ignoring datasourceIds
+    mocked_ot.post(GRAPHQL_PATH).mock(
+        side_effect=lambda r: httpx.Response(
+            200, json=good if "DiseaseEvidence" in r.content.decode() else _other(r)
+        )
+    )
+    p = await ot_service.get_target_disease_evidence(BRAF, disease=MELANOMA)
+    assert {r["datasource_id"] for r in p["evidence"]} <= {"intogen", "clinical_precedence"}
+    assert p["filtered_out"] == len(cgc)
+
+
+def _other(request: httpx.Request) -> Any:
+    from tests.conftest import _graphql
+
+    return json.loads(_graphql(request).content)
+
+
+async def test_evidence_without_disease_is_two_step_with_scope(
+    ot_service: OpenTargetsService, mocked_ot: respx.MockRouter
+) -> None:
+    p = await ot_service.get_target_disease_evidence(KRAS, datasource="gene_burden")
+    efo_ids = _sent(mocked_ot, "TargetEvidence")[0]["efo_ids"]
+    assert len(efo_ids) == p["disease_scope"]["diseases_considered"] > 1000
+    assert p["disease_scope"]["complete"]
+    row = p["evidence"][0]
+    assert row["datasource_id"] == "gene_burden" and row["odds_ratio"] == 12.27
+    assert p["total"] == 3 and not p["truncated"] and p["next_cursor"] is None
+
+
+async def test_evidence_rows_label_variants_grch38() -> None:
+    from opentargets_link.shaping import evidence_row
+
+    row = evidence_row({"datasourceId": "eva", "variant": {"id": "7_140753336_A_T"}}, "compact")
+    assert row["variant"] == {"id": "7_140753336_A_T", "assembly": "GRCh38"}
+
+
+async def test_bad_cursor_names_the_parameter(ot_service: OpenTargetsService) -> None:
+    with pytest.raises(InvalidInputError) as info:
+        await ot_service.get_target_disease_evidence(BRAF, disease=MELANOMA, cursor="{bad}")
+    assert info.value.extra["field"] == "cursor"
+
+
+async def test_resolve_target_errors_name_query_and_never_loop(
+    ot_service: OpenTargetsService,
+) -> None:
+    with pytest.raises(InvalidInputError) as bad:
+        await ot_service.resolve_target("HGNC:1097")
+    assert bad.value.extra["field"] == "query"
+    with pytest.raises(NotFoundError) as missing:
+        await ot_service.resolve_target("ENSG00000000001")
+    assert missing.value.extra["field"] == "query"
+    assert missing.value.extra["next_commands"][0]["tool"] == "hgnc_resolve_symbol"
+
+
+def test_cache_default_is_bounded_for_large_ot_payloads() -> None:
+    from opentargets_link.config import OpenTargetsSettings
+
+    assert OpenTargetsSettings().cache_maxsize <= 128
