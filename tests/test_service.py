@@ -52,7 +52,7 @@ async def test_foreign_gene_ids_point_to_hgnc(ot_service: OpenTargetsService, va
 async def test_unknown_target_is_not_found(ot_service: OpenTargetsService) -> None:
     with pytest.raises(NotFoundError) as info:
         await ot_service.resolve_target("NOTAGENE1")
-    assert info.value.extra["field"] == "target"
+    assert info.value.extra["field"] == "query"
     with pytest.raises(NotFoundError):
         await ot_service.resolve_target("ENSG00000000001")
 
@@ -191,3 +191,21 @@ async def test_bad_cursor_names_the_parameter(ot_service: OpenTargetsService) ->
     with pytest.raises(InvalidInputError) as info:
         await ot_service.get_target_disease_evidence(BRAF, disease=MELANOMA, cursor="{bad}")
     assert info.value.extra["field"] == "cursor"
+
+
+async def test_resolve_target_errors_name_query_and_never_loop(
+    ot_service: OpenTargetsService,
+) -> None:
+    with pytest.raises(InvalidInputError) as bad:
+        await ot_service.resolve_target("HGNC:1097")
+    assert bad.value.extra["field"] == "query"
+    with pytest.raises(NotFoundError) as missing:
+        await ot_service.resolve_target("ENSG00000000001")
+    assert missing.value.extra["field"] == "query"
+    assert missing.value.extra["next_commands"][0]["tool"] == "hgnc_resolve_symbol"
+
+
+def test_cache_default_is_bounded_for_large_ot_payloads() -> None:
+    from opentargets_link.config import OpenTargetsSettings
+
+    assert OpenTargetsSettings().cache_maxsize <= 128

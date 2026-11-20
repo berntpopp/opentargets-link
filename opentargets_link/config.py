@@ -142,7 +142,11 @@ class OpenTargetsSettings(BaseModel):
         default=900, ge=0, le=86_400, description="In-process response cache TTL (seconds)."
     )
     cache_maxsize: StrictInt = Field(
-        default=512, ge=1, le=10_000, description="In-process response cache entries."
+        # OT payloads reach ~1 MB parsed (BRAF full drugs); 128 keeps the cache well under 384 MB.
+        default=128,
+        ge=1,
+        le=10_000,
+        description="In-process response cache entries.",
     )
 
 

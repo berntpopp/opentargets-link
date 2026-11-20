@@ -189,15 +189,18 @@ class OpenTargetsService:
             block["resolved_from"] = d["resolved_from"]
         return block
 
-    async def _target(self, document: str, target: str) -> tuple[dict[str, Any], str | None]:
-        target_id, resolved_from = await self._target_id(target)
+    async def _target(
+        self, document: str, target: str, field: str = "target"
+    ) -> tuple[dict[str, Any], str | None]:
+        target_id, resolved_from = await self._target_id(target, field)
         raw = (await self._q(document, {"target_id": target_id})).get("target")
         if not raw:
+            step = "hgnc_resolve_symbol" if field == "query" else "resolve_target"
             raise NotFoundError(
-                "No Open Targets target has this `target`.",
-                field="target",
-                hint="Find the Ensembl gene ID with resolve_target(query).",
-                next_commands=[cmd("resolve_target", query=target.strip())],
+                f"No Open Targets target has this `{field}`.",
+                field=field,
+                hint="Find the Ensembl gene ID with resolve_target(query) or hgnc_resolve_symbol.",
+                next_commands=[cmd(step, query=target.strip())],
             )
         return raw, resolved_from
 
@@ -212,7 +215,7 @@ class OpenTargetsService:
 
     async def resolve_target(self, query: str) -> dict[str, Any]:
         """Symbol, alias or Ensembl gene ID -> one target with location and synonyms."""
-        raw, resolved_from = await self._target(Q.TARGET_GET, query)
+        raw, resolved_from = await self._target(Q.TARGET_GET, query, "query")
         loc = raw.get("genomicLocation") or {}
         target = self._target_block(raw, resolved_from)
         target["location"] = {"assembly": "GRCh38", **loc} if loc else None

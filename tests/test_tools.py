@@ -57,7 +57,7 @@ async def test_unknown_target_is_is_error_not_found(facade: Any) -> None:
     res = await _raw(facade, "resolve_target", {"query": "ENSG00000000001"})
     assert res.is_error is True
     body = res.structured_content
-    assert body["error_code"] == "not_found" and body["field"] == "target"
+    assert body["error_code"] == "not_found" and body["field"] == "query"
 
 
 async def test_evidence_paging_suggests_next_cursor(facade: Any, call_tool: Any) -> None:
