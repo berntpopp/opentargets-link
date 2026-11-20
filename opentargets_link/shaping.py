@@ -198,6 +198,9 @@ def evidence_row(raw: dict[str, Any], mode: str) -> dict[str, Any]:
         if key == "credibleSet" and value.get("variant"):
             value = {**value, "variant": {**value["variant"], "assembly": "GRCh38"}}
         out[_snake(key)] = value
+    mantissa, exponent = out.pop("p_value_mantissa", None), out.pop("p_value_exponent", None)
+    if mantissa is not None and exponent is not None:
+        out["p_value"] = float(f"{mantissa}e{exponent}")
     if mode == "minimal":
         return {k: out[k] for k in _MINIMAL if k in out}
     return out

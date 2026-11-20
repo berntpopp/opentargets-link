@@ -280,3 +280,11 @@ def test_minimal_evidence_rows_keep_the_variant_id() -> None:
 
     raw = {"id": "e1", "datasourceId": "eva_somatic", "variant": {"id": "7_140753336_A_T"}}
     assert evidence_row(raw, "minimal")["variant"]["id"] == "7_140753336_A_T"
+
+
+def test_p_value_is_one_float_not_mantissa_and_exponent() -> None:
+    from opentargets_link.shaping import evidence_row
+
+    raw = {"id": "e1", "pValueMantissa": 5.253, "pValueExponent": -20, "oddsRatio": 9.8}
+    row = evidence_row(raw, "compact")
+    assert row["p_value"] == 5.253e-20 and "p_value_mantissa" not in row
