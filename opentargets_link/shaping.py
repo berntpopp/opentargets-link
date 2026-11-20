@@ -31,7 +31,8 @@ NO_EVIDENCE = (
 
 #: Argument forms.
 ENSEMBL_GENE = re.compile(r"^ENSG\d{11}(?:\.\d+)?$", re.IGNORECASE)
-FOREIGN_GENE = re.compile(r"^(?:HGNC:\d+|(?:NCBIGene|Entrez(?:Gene)?):\d+|\d{1,9})$", re.I)
+FOREIGN_GENE = re.compile(r"^(?:(?:NCBIGene|Entrez(?:Gene)?):\d+|\d{1,9})$", re.I)
+HGNC_ID = re.compile(r"^HGNC:\d{1,7}$", re.I)  # Open Targets mapIds resolves these itself
 SYMBOL = re.compile(r"^[A-Za-z0-9][A-Za-z0-9.\-_@]{0,29}$")
 DISEASE_ID = re.compile(r"^(MONDO|EFO|Orphanet|HP|OTAR|OBA)[_:](\d{1,9})$", re.IGNORECASE)
 FOREIGN_DISEASE = re.compile(r"^(?:OMIM|MIM|DOID|ORPHA|ICD10|ICD-?10|UMLS|MESH|NCIT):", re.I)
@@ -40,7 +41,6 @@ CURSOR = re.compile(r"^[A-Za-z0-9+/=_-]{1,200}$")
 #: Clinical stages, most advanced first (Open Targets enum strings).
 STAGES = (
     "APPROVAL",
-    "PHASE_4",
     "PHASE_3",
     "PHASE_2_3",
     "PHASE_2",
@@ -50,10 +50,23 @@ STAGES = (
     "PRECLINICAL",
     "UNKNOWN",
 )
+#: Open Targets ranks WITHDRAWAL > PHASE_4 (post-marketing) > APPROVAL when it picks a drug's
+#: stage for a target, so an approved drug with phase-4 trials shows PHASE_4. All three mean
+#: the drug reached approval; they share the APPROVAL tier.
+APPROVED_STAGES = frozenset({"APPROVAL", "PHASE_4", "WITHDRAWAL"})
+STAGE_NOTE = (
+    "max_clinical_stage_for_target is Open Targets' highest stage for this drug and target; "
+    "Open Targets ranks WITHDRAWAL above PHASE_4 (post-marketing trials) above APPROVAL, so "
+    "all three mean the drug was approved somewhere (approved=true). drug_max_clinical_stage "
+    "covers any target. Salt forms (e.g. DABRAFENIB MESYLATE) are separate ChEMBL records; "
+    "parent_drug_id links them. Stages lag regulators and are not indication-specific."
+)
 
 
 def stage_rank(stage: Any) -> int:
     """Sort key: lower is more advanced; unknown strings sort last."""
+    if stage in APPROVED_STAGES:
+        return 0
     return STAGES.index(stage) if stage in STAGES else len(STAGES)
 
 
@@ -116,9 +129,12 @@ def drug_row(
         "drug_id": drug.get("id"),
         "drug_name": drug.get("name"),
         "max_clinical_stage_for_target": raw.get("maxClinicalStage"),
+        "approved": raw.get("maxClinicalStage") in APPROVED_STAGES,
     }
     if mode == "minimal":
         return out
+    if parent := (drug.get("parentMolecule") or {}).get("id"):
+        out["parent_drug_id"] = parent
     moa = [
         m
         for m in (drug.get("mechanismsOfAction") or {}).get("rows") or []
@@ -168,18 +184,38 @@ def _snake(name: str) -> str:
     return re.sub(r"(?<!^)(?=[A-Z])", "_", name).lower()
 
 
-_MINIMAL = ("id", "datasource_id", "datatype_id", "score", "disease")
+_MINIMAL = ("id", "datasource_id", "score", "disease", "variant")
+
+
+def _p_and_floats(d: dict[str, Any], mantissa: str, exponent: str, round_: bool) -> dict[str, Any]:
+    """One ``p_value`` float from mantissa/exponent; floats to 4 significant digits if asked.
+
+    Upstream floats are float32 noise past 4 significant digits (OR 9.81350040435791).
+    """
+    m, e = d.pop(mantissa, None), d.pop(exponent, None)
+    if m is not None and e is not None:
+        d["p_value"] = float(f"{m}e{e}")
+    return {k: float(f"{v:.4g}") if round_ and isinstance(v, float) else v for k, v in d.items()}
 
 
 def evidence_row(raw: dict[str, Any], mode: str) -> dict[str, Any]:
     """One evidence row: non-empty upstream fields in snake_case, variants labelled GRCh38."""
+    compact = mode in ("minimal", "compact")
     out: dict[str, Any] = {}
     for key, value in raw.items():
         if value is None or value == [] or (key == "literature" and mode == "compact"):
             continue
         if key == "variant":
             value = {"id": value.get("id"), "assembly": "GRCh38"}
+        if key == "credibleSet":
+            if value.get("variant"):
+                value = {**value, "variant": {**value["variant"], "assembly": "GRCh38"}}
+            value = _p_and_floats(dict(value), "pValueMantissa", "pValueExponent", compact)
         out[_snake(key)] = value
+    out = _p_and_floats(out, "p_value_mantissa", "p_value_exponent", compact)
+    if not compact:
+        return out
+    out.pop("datatype_id", None)  # implied by datasource_id
     if mode == "minimal":
         return {k: out[k] for k in _MINIMAL if k in out}
     return out

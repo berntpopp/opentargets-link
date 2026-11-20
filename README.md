@@ -68,10 +68,10 @@ Use `unified` (the default) for MCP over HTTP; `--transport http` serves `/healt
 
 | Tool | Purpose |
 |------|---------|
-| `resolve_target` | Entry resolver: symbol, alias or Ensembl gene ID → target (GRCh38 location, synonyms) |
+| `resolve_target` | Entry resolver: symbol, alias, HGNC ID or Ensembl gene ID → target (GRCh38 location, synonyms) |
 | `get_target_tractability` | Tractability buckets per modality (small molecule, antibody, PROTAC, other) |
 | `get_drug_candidates` | ChEMBL drugs and clinical candidates for a target, optionally for one disease |
-| `search_disease_targets` | Targets ranked for a disease by the allowlist-only association score |
+| `search_disease_targets` | Targets ranked for a disease by the allowlist-only association score, or by one datasource's score |
 | `get_target_disease_evidence` | Evidence rows linking a target to a disease (or to any disease) |
 | `get_server_capabilities` | Discovery: datasource allowlist, limits, error codes, licence and citation |
 | `get_diagnostics` | Local runtime state: request budget, cache hits, latency |

@@ -22,7 +22,7 @@ Target = Annotated[
     Field(
         min_length=1,
         max_length=40,
-        description="Ensembl gene ID (ENSG00000157764) or HGNC symbol (BRAF).",
+        description="Ensembl gene ID (ENSG00000157764), HGNC symbol (BRAF) or HGNC ID.",
         examples=["BRAF"],
     ),
 ]
@@ -30,14 +30,14 @@ _Disease = Annotated[str, Field(min_length=2, max_length=200)]
 DiseaseArg = Annotated[
     _Disease,
     Field(
-        description="MONDO/EFO ID (MONDO_0005105) or disease name (melanoma, top match is "
+        description="MONDO/EFO/HP ID (MONDO_0005105) or disease name (melanoma, top match is "
         "reported as resolved_from); covers descendants.",
         examples=["MONDO_0005105"],
     ),
 ]
 OptDisease = Annotated[
     _Disease | None,
-    Field(description="Only this disease and its descendants (MONDO/EFO ID or name)."),
+    Field(description="Only this disease and its descendants (MONDO/EFO/HP ID or name)."),
 ]
 OptSource = Annotated[
     Datasource | None,
@@ -48,7 +48,11 @@ Offset = Annotated[
 ]
 Mode = Annotated[
     Literal["minimal", "compact", "standard", "full"],
-    Field(description="Row detail; default compact."),
+    Field(
+        description="Row detail. minimal: IDs, stage or score, disease, variant; compact "
+        "(default): key fields, floats to 4 significant digits; standard: upstream values "
+        "verbatim (+ literature, drug mechanism); full: + top 3 drug clinical reports."
+    ),
 ]
 
 
@@ -112,7 +116,7 @@ def register_opentargets_tools(mcp: FastMCP) -> None:
             Field(
                 min_length=1,
                 max_length=40,
-                description="HGNC symbol, alias or Ensembl gene ID.",
+                description="HGNC symbol, alias, HGNC ID or Ensembl gene ID.",
                 examples=["BRAF"],
             ),
         ],
@@ -196,8 +200,9 @@ def register_opentargets_tools(mcp: FastMCP) -> None:
         description=(
             "Return targets associated with a disease, ranked by Open Targets association "
             "score recomputed from served datasources only, with per-datasource scores. "
-            "datasource='intogen' lists somatic cancer drivers; 'gene_burden' or "
-            "'gwas_credible_sets' germline signals. `total` is exact. "
+            "datasource= keeps targets with that source and ranks by its score (ranked_by): "
+            "'intogen' somatic cancer drivers; 'gene_burden' or 'gwas_credible_sets' germline "
+            "signals. `total` is exact. "
             "Signature: search_disease_targets(disease, datasource=, limit=, offset=)."
         ),
     )

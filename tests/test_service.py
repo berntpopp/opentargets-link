@@ -40,7 +40,12 @@ async def test_alias_resolves_and_says_so(ot_service: OpenTargetsService) -> Non
     assert hit == ("ENSG00000141736", "HER2")
 
 
-@pytest.mark.parametrize("value", ["HGNC:1097", "NCBIGene:673", "673"])
+async def test_hgnc_id_resolves_through_open_targets(ot_service: OpenTargetsService) -> None:
+    p = await ot_service.get_target_tractability("HGNC:1097")
+    assert p["target"]["id"] == BRAF and p["target"]["resolved_from"] == "HGNC:1097"
+
+
+@pytest.mark.parametrize("value", ["NCBIGene:673", "673"])
 async def test_foreign_gene_ids_point_to_hgnc(ot_service: OpenTargetsService, value: str) -> None:
     with pytest.raises(InvalidInputError) as info:
         await ot_service.get_target_tractability(value)
@@ -75,7 +80,7 @@ async def test_braf_melanoma_drug_candidates_include_vemurafenib_and_dabrafenib(
     assert p["total"] < 18  # the disease filter removed drugs never studied in melanoma
     assert "ARQ-736" not in names
     stages = [r["max_clinical_stage_for_target"] for r in p["drug_candidates"]]
-    assert stages[0] == "APPROVAL"
+    assert p["drug_candidates"][0]["approved"] and stages[0] in {"APPROVAL", "PHASE_4"}
     assert all("clinical_reports" not in r for r in p["drug_candidates"])
     assert "ChEMBL (CC BY-SA 3.0)" in p["licence_note"]
 
@@ -109,14 +114,19 @@ async def test_disease_targets_zero_weight_excluded_sources_and_filter_scores(
     for row in p["targets"]:
         assert not {"cancer_gene_census", "europepmc", "crispr"} & set(row["datasource_scores"])
     assert p["total"] > 1000 and p["truncated"]
+    assert _sent(mocked_ot, "DiseaseTargets")[0]["order"] == "score" == p["ranked_by"]
 
 
 async def test_disease_targets_datasource_filter_is_required(
     ot_service: OpenTargetsService, mocked_ot: respx.MockRouter
 ) -> None:
-    await ot_service.search_disease_targets(MELANOMA, datasource="intogen")
-    sent = _sent(mocked_ot, "DiseaseTargets")[0]["datasources"]
-    assert {"id": "intogen", "weight": 1.0, "propagate": True, "required": True} in sent
+    p = await ot_service.search_disease_targets(MELANOMA, datasource="intogen")
+    sent = _sent(mocked_ot, "DiseaseTargets")[0]
+    assert {"id": "intogen", "weight": 1.0, "propagate": True, "required": True} in sent[
+        "datasources"
+    ]
+    assert sent["order"] == "intogen" and p["ranked_by"] == "intogen"  # not the overall score
+    assert "datasource_scores.intogen" in p["score_note"]  # `score` is not the sort key here
 
 
 @pytest.mark.parametrize("value", ["OMIM:155600", "DOID:1909"])
@@ -126,13 +136,23 @@ async def test_foreign_disease_ids_point_to_mondo(
     with pytest.raises(InvalidInputError) as info:
         await ot_service.search_disease_targets(value)
     assert info.value.extra["next_commands"][0]["tool"] == "mondo_resolve_disease"
+    assert "genefoundry" in info.value.extra["hint"] and "name" in info.value.extra["hint"]
+
+
+@pytest.mark.parametrize("name", ["oesophageal melanoma", "Oesophageal melanoma"])
+async def test_british_spelling_falls_back_to_us(ot_service: OpenTargetsService, name: str) -> None:
+    p = await ot_service.search_disease_targets(name, limit=1)
+    assert p["disease"]["id"] == MELANOMA
+    assert p["disease"]["resolved_from"] == name
 
 
 async def test_unknown_disease_is_not_found(ot_service: OpenTargetsService) -> None:
     with pytest.raises(NotFoundError):
         await ot_service.search_disease_targets("zzzz not a disease")
-    with pytest.raises(NotFoundError):
+    with pytest.raises(NotFoundError) as unknown_id:
         await ot_service.search_disease_targets("MONDO_9999999")
+    assert not unknown_id.value.extra.get("next_commands")  # mondo cannot map a made-up ID
+    assert "name" in unknown_id.value.extra["hint"]
 
 
 async def test_braf_melanoma_evidence_is_allowlisted_only(
@@ -193,19 +213,113 @@ async def test_bad_cursor_names_the_parameter(ot_service: OpenTargetsService) ->
     assert info.value.extra["field"] == "cursor"
 
 
+@pytest.mark.parametrize("cursor", ["invalid-cursor", "eyJ4IjoxfQ=="])  # not a page position
+async def test_well_formed_but_foreign_cursor_is_rejected_not_page_one(
+    ot_service: OpenTargetsService, cursor: str
+) -> None:
+    with pytest.raises(InvalidInputError) as info:
+        await ot_service.get_target_disease_evidence(BRAF, disease=MELANOMA, cursor=cursor)
+    assert info.value.extra["field"] == "cursor"
+
+
 async def test_resolve_target_errors_name_query_and_never_loop(
     ot_service: OpenTargetsService,
 ) -> None:
     with pytest.raises(InvalidInputError) as bad:
-        await ot_service.resolve_target("HGNC:1097")
+        await ot_service.resolve_target("673")
     assert bad.value.extra["field"] == "query"
     with pytest.raises(NotFoundError) as missing:
         await ot_service.resolve_target("ENSG00000000001")
     assert missing.value.extra["field"] == "query"
-    assert missing.value.extra["next_commands"][0]["tool"] == "hgnc_resolve_symbol"
+    assert not missing.value.extra.get("next_commands")  # hgnc cannot map an unknown ENSG
+    assert "symbol" in missing.value.extra["hint"]
+    assert "genefoundry" in bad.value.extra["hint"]  # the sibling tool is named as such
 
 
 def test_cache_default_is_bounded_for_large_ot_payloads() -> None:
     from opentargets_link.config import OpenTargetsSettings
 
     assert OpenTargetsSettings().cache_maxsize <= 128
+
+
+def test_post_approval_stages_rank_and_read_as_approved() -> None:
+    """Open Targets ranks WITHDRAWAL > PHASE_4 > APPROVAL; all three mean the drug was approved."""
+    from opentargets_link.shaping import drug_row, stage_rank
+
+    assert stage_rank("APPROVAL") == stage_rank("PHASE_4") == stage_rank("WITHDRAWAL")
+    assert stage_rank("PHASE_4") < stage_rank("PHASE_3")
+    node = {
+        "maxClinicalStage": "PHASE_4",
+        "drug": {"id": "CHEMBL2028663", "name": "DABRAFENIB", "parentMolecule": None},
+    }
+    assert drug_row(node, BRAF, "minimal", None)["approved"] is True
+    salt = {
+        "maxClinicalStage": "PHASE_3",
+        "drug": {"id": "CHEMBL2105729", "parentMolecule": {"id": "CHEMBL2028663"}},
+    }
+    row = drug_row(salt, BRAF, "compact", None)
+    assert row["approved"] is False and row["parent_drug_id"] == "CHEMBL2028663"
+
+
+async def test_drug_payload_explains_stages(ot_service: OpenTargetsService) -> None:
+    p = await ot_service.get_drug_candidates(BRAF, limit=5)
+    assert "PHASE_4" in p["stage_note"] and "Salt" in p["stage_note"]
+    assert sum(p["stage_counts"].values()) == p["total"] == 18  # over every row, not the page
+    assert p["approved_total"] == sum(
+        n for s, n in p["stage_counts"].items() if s in {"APPROVAL", "PHASE_4", "WITHDRAWAL"}
+    )
+    later = await ot_service.get_drug_candidates(BRAF, limit=5, offset=5)
+    assert "stage_note" not in later and later["stage_counts"] == p["stage_counts"]
+
+
+def test_gwas_credible_set_rows_carry_study_lead_variant_and_p_value() -> None:
+    from opentargets_link import queries as Q
+    from opentargets_link.shaping import evidence_row
+
+    assert "credibleSet {" in Q.DISEASE_EVIDENCE and "credibleSet {" in Q.TARGET_EVIDENCE
+    cs = {
+        "studyLocusId": "a6ea",
+        "study": {"id": "GCST90011809", "pubmedId": "32887889", "nSamples": 417127},
+        "variant": {"id": "9_21965233_C_G", "rsIds": ["rs2188127"]},
+        "pValueMantissa": 2.01,
+        "pValueExponent": -7,
+    }
+    row = evidence_row({"datasourceId": "gwas_credible_sets", "credibleSet": cs}, "compact")
+    assert row["credible_set"]["study"]["pubmedId"] == "32887889"
+    assert row["credible_set"]["variant"]["assembly"] == "GRCh38"
+
+
+def test_minimal_evidence_rows_keep_the_variant_id() -> None:
+    from opentargets_link.shaping import evidence_row
+
+    raw = {"id": "e1", "datasourceId": "eva_somatic", "variant": {"id": "7_140753336_A_T"}}
+    assert evidence_row(raw, "minimal")["variant"]["id"] == "7_140753336_A_T"
+
+
+def test_p_value_is_one_float_not_mantissa_and_exponent() -> None:
+    from opentargets_link.shaping import evidence_row
+
+    raw = {"id": "e1", "pValueMantissa": 5.253, "pValueExponent": -20, "oddsRatio": 9.8}
+    row = evidence_row(raw, "compact")
+    assert row["p_value"] == 5.253e-20 and "p_value_mantissa" not in row
+
+
+def test_compact_rows_round_float_noise_and_drop_derivable_fields() -> None:
+    from opentargets_link.shaping import evidence_row
+
+    raw = {"id": "e1", "datasourceId": "gene_burden", "datatypeId": "genetic_association"}
+    raw |= {"oddsRatio": 9.81350040435791, "pValueMantissa": 5.253, "pValueExponent": -20}
+    compact = evidence_row(raw, "compact")
+    assert compact["odds_ratio"] == 9.814 and compact["p_value"] == 5.253e-20
+    assert "datatype_id" not in compact and "datatype_id" not in evidence_row(raw, "minimal")
+    standard = evidence_row(raw, "standard")  # standard and full keep upstream values verbatim
+    assert standard["odds_ratio"] == 9.81350040435791 and standard["datatype_id"]
+
+
+def test_credible_set_gets_the_same_p_value_and_rounding_as_the_row() -> None:
+    from opentargets_link.shaping import evidence_row
+
+    cs = {"pValueMantissa": 2.011000394821167, "pValueExponent": -7, "beta": -0.0077454657}
+    row = evidence_row({"id": "e1", "credibleSet": cs}, "compact")["credible_set"]
+    assert row["p_value"] == 2.011e-7 and row["beta"] == -0.007745
+    assert "pValueMantissa" not in row

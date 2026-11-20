@@ -48,8 +48,10 @@ def _fixture_for(op: str, v: dict[str, Any]) -> str:
     if op == "MapIds":
         hits = {
             ("target", "BRAF"): "map_braf",
+            ("target", "HGNC:1097"): "map_hgnc_braf",
             ("target", "HER2"): "map_her2",
             ("disease", "melanoma"): "map_melanoma",
+            ("disease", "esophageal melanoma"): "map_melanoma",  # US spelling only
         }
         miss = "map_none" if v["entity"] == "target" else "map_disease_none"
         query = v["query"].upper() if v["entity"] == "target" else v["query"]

@@ -42,7 +42,7 @@ query Tractability($target_id: String!) {{
 _DRUG_ROW = """
   maxClinicalStage
   drug {
-    id name drugType maximumClinicalStage
+    id name drugType maximumClinicalStage parentMolecule { id }
     mechanismsOfAction { rows { mechanismOfAction actionType targets { id } } }
   }
   diseases { disease { id name } }
@@ -79,10 +79,12 @@ query DiseaseGet($disease_id: String!) {
 """
 
 DISEASE_TARGETS = """
-query DiseaseTargets($disease_id: String!, $size: Int!, $datasources: [DatasourceSettingsInput!]) {
+query DiseaseTargets($disease_id: String!, $size: Int!, $datasources: [DatasourceSettingsInput!],
+  $order: String) {
   disease(efoId: $disease_id) {
     id name
-    associatedTargets(page: {index: 0, size: $size}, datasources: $datasources) {
+    associatedTargets(page: {index: 0, size: $size}, datasources: $datasources,
+      orderByScore: $order) {
       count
       rows { score target { id approvedSymbol approvedName } datasourceScores { id score } }
     }
@@ -116,6 +118,11 @@ _EVIDENCE = """
     beta betaConfidenceIntervalLower betaConfidenceIntervalUpper
     pValueMantissa pValueExponent statisticalMethod ancestry studySampleSize projectId
     clinicalStage drug { id name }
+    credibleSet {
+      studyLocusId finemappingMethod pValueMantissa pValueExponent beta
+      study { id traitFromSource publicationFirstAuthor pubmedId nSamples }
+      variant { id rsIds }
+    }
     literature
   }
 """

@@ -10,6 +10,8 @@ from __future__ import annotations
 
 import base64
 import json
+import re
+from collections import Counter
 from datetime import UTC, datetime
 from typing import Any
 
@@ -28,10 +30,12 @@ from opentargets_link.shaping import (
     ENSEMBL_GENE,
     FOREIGN_DISEASE,
     FOREIGN_GENE,
+    HGNC_ID,
     NO_DRUGS,
     NO_EVIDENCE,
     NOT_A_REPORT,
     SITE,
+    STAGE_NOTE,
     SYMBOL,
     allowed_scores,
     disease_curie,
@@ -46,8 +50,20 @@ DEFAULT_LIMIT = 10
 MAX_LIMIT = 50
 DRUG_MAX_LIMIT = 20  # full mode fences 1 + 3 texts per row; stay under the 128-fence ceiling
 ASSOC_MAX_WINDOW = 3000  # Open Targets' largest page
-GENE_FORMS = ["Ensembl gene ID (ENSG00000157764)", "HGNC symbol (BRAF)"]
-DISEASE_FORMS = ["MONDO/EFO/Orphanet ID (MONDO_0005105 or MONDO:0005105)", "disease name"]
+GENE_FORMS = [
+    "Ensembl gene ID (ENSG00000157764)",
+    "HGNC symbol (BRAF)",
+    "HGNC ID (HGNC:1097)",
+]
+DISEASE_FORMS = ["MONDO/EFO/Orphanet/HP ID (MONDO_0005105 or MONDO:0005105)", "disease name"]
+HGNC_HINT = (
+    "hgnc_resolve_symbol runs on the GeneFoundry hgnc server (call it through the genefoundry "
+    "router); standalone, pass the approved HGNC symbol or the Ensembl gene ID."
+)
+MONDO_HINT = (
+    "mondo_resolve_disease runs on the GeneFoundry mondo server (call it through the "
+    "genefoundry router); standalone, pass the disease name, e.g. disease='melanoma'."
+)
 _FIELDS = {"target_id": "target", "disease_id": "disease", "size": "limit", "efo_ids": "disease"}
 
 
@@ -62,19 +78,24 @@ def _limit(limit: int, maximum: int, offset: int = 0) -> None:
         raise InvalidInputError("`offset` must be >= 0.", field="offset")
 
 
-def _more(cursor: Any, total: int) -> bool:
-    """Whether rows remain after this page (Open Targets returns a cursor on the last page too).
+def _position(cursor: Any) -> int | None:
+    """Rows before the page a cursor points at, or None if it is not an Open Targets cursor.
 
-    ponytail: reads the cursor's undocumented base64 ``{"index", "size"}``; if that format
-    changes we fall back to "a cursor means more" (never hides rows, may offer an empty page).
+    ponytail: reads the cursor's undocumented base64 ``{"index", "size"}`` (Open Targets
+    answers any other string with page one, so we must check). If upstream changes the
+    format, the live paging test fails and this decoder needs updating.
     """
-    if not isinstance(cursor, str):
-        return False
     try:
-        pos = json.loads(base64.b64decode(cursor))
-        return int(pos["index"]) * int(pos["size"]) < total
+        pos = json.loads(base64.b64decode(cursor, validate=True))
+        return int(pos["index"]) * int(pos["size"])
     except ValueError, KeyError, TypeError:
-        return True
+        return None
+
+
+def _more(cursor: Any, total: int) -> bool:
+    """Whether rows remain after this page (Open Targets returns a cursor on the last page too)."""
+    pos = _position(cursor) if isinstance(cursor, str) else None
+    return pos is not None and pos < total
 
 
 class OpenTargetsService:
@@ -115,18 +136,22 @@ class OpenTargetsService:
             return term.split(".")[0].upper(), None
         if FOREIGN_GENE.fullmatch(term):
             raise InvalidInputError(
-                f"`{field}` takes an Ensembl gene ID or an HGNC symbol, not an HGNC or NCBI "
+                f"`{field}` takes an Ensembl gene ID, HGNC symbol or HGNC ID, not an NCBI "
                 "Gene ID; convert it first.",
                 field=field,
                 allowed_values=GENE_FORMS,
+                hint=HGNC_HINT,
                 next_commands=[cmd("hgnc_resolve_symbol", query=term)],
                 recovery_action="reformulate_input",
             )
-        if not SYMBOL.fullmatch(term):
+        if HGNC_ID.fullmatch(term):
+            term = term.upper()
+        elif not SYMBOL.fullmatch(term):
             raise InvalidInputError(
                 f"`{field}` must be an Ensembl gene ID or an HGNC symbol.",
                 field=field,
                 allowed_values=GENE_FORMS,
+                hint=HGNC_HINT,
                 next_commands=[cmd("hgnc_resolve_symbol", query=term[:60])],
             )
         hits = await self._map(term, "target")
@@ -136,7 +161,7 @@ class OpenTargetsService:
             raise NotFoundError(
                 f"No Open Targets target matches `{field}`.",
                 field=field,
-                hint="Check the symbol with hgnc_resolve_symbol, or pass an Ensembl gene ID.",
+                hint=HGNC_HINT,
                 next_commands=[cmd("hgnc_resolve_symbol", query=term)],
             )
         if len(hits) > 1:
@@ -153,10 +178,11 @@ class OpenTargetsService:
         term = " ".join(value.split())
         if FOREIGN_DISEASE.match(term):
             raise InvalidInputError(
-                "`disease` takes a MONDO/EFO/Orphanet ID or a disease name; convert OMIM, "
+                "`disease` takes a MONDO/EFO/Orphanet/HP ID or a disease name; convert OMIM, "
                 "DOID and other IDs to MONDO first.",
                 field="disease",
                 allowed_values=DISEASE_FORMS,
+                hint=MONDO_HINT,
                 next_commands=[cmd("mondo_resolve_disease", query=term)],
                 recovery_action="reformulate_input",
             )
@@ -164,21 +190,29 @@ class OpenTargetsService:
         resolved_from = None
         if disease_id is None:
             hits = await self._map(term, "disease")
+            us = re.sub(r"(?i)ae|oe", "e", term)  # haem-, Oesophag-, -aemia
+            if not hits and us != term:
+                hits = await self._map(us, "disease")
             if not hits:
                 raise self._no_disease(term)
             disease_id, resolved_from = str(hits[0]["id"]), term
         found = (await self._q(Q.DISEASE_GET, {"disease_id": disease_id})).get("disease")
         if not found:
-            raise self._no_disease(term)
+            raise self._no_disease(term, by_id=resolved_from is None)
         return {**found, "resolved_from": resolved_from}
 
     @staticmethod
-    def _no_disease(term: str) -> NotFoundError:
+    def _no_disease(term: str, by_id: bool = False) -> NotFoundError:
+        if by_id:  # a made-up or obsolete ID: no resolver can map it
+            return NotFoundError(
+                "No Open Targets disease has this `disease` ID (obsolete or not in Open Targets).",
+                field="disease",
+                hint="Pass the disease name instead, e.g. disease='melanoma'.",
+            )
         return NotFoundError(
             "No Open Targets disease matches `disease`.",
             field="disease",
-            hint="Pass a MONDO ID (MONDO_0005105); mondo_resolve_disease maps names and "
-            "OMIM/DOID IDs to MONDO.",
+            hint=MONDO_HINT,
             next_commands=[cmd("mondo_resolve_disease", query=term)],
         )
 
@@ -194,13 +228,11 @@ class OpenTargetsService:
     ) -> tuple[dict[str, Any], str | None]:
         target_id, resolved_from = await self._target_id(target, field)
         raw = (await self._q(document, {"target_id": target_id})).get("target")
-        if not raw:
-            step = "hgnc_resolve_symbol" if field == "query" else "resolve_target"
+        if not raw:  # only an Ensembl ID reaches here (symbols resolve to existing targets)
             raise NotFoundError(
-                f"No Open Targets target has this `{field}`.",
+                f"No Open Targets target has this `{field}` (retired or not a gene ID).",
                 field=field,
-                hint="Find the Ensembl gene ID with resolve_target(query) or hgnc_resolve_symbol.",
-                next_commands=[cmd(step, query=target.strip())],
+                hint="Pass the gene symbol to resolve_target(query) for the current Ensembl ID.",
             )
         return raw, resolved_from
 
@@ -260,6 +292,7 @@ class OpenTargetsService:
         dz = await self._disease(disease) if disease is not None else None
         wanted = {dz["id"], *(dz.get("descendants") or [])} if dz else None
         rows: list[dict[str, Any]] = []
+        parents: set[str] = set()  # a salt counts with its parent drug
         conn = raw.get("drugAndClinicalCandidates") or {}
         for node in conn.get("rows") or []:
             matched = None
@@ -273,14 +306,21 @@ class OpenTargetsService:
                     continue
                 matched = list(found.values())
             rows.append(drug_row(node, raw["id"], response_mode, matched))
+            drug = node.get("drug") or {}
+            parents.add(str((drug.get("parentMolecule") or {}).get("id") or drug.get("id")))
         rows.sort(key=lambda r: (stage_rank(r["max_clinical_stage_for_target"]), r["drug_name"]))
         page = rows[offset : offset + limit]
         payload: dict[str, Any] = {
             "target": self._target_block(raw, resolved_from),
             "drug_candidates": page,
             **page_block(total=len(rows), returned=len(page), limit=limit, offset=offset),
+            "parent_drugs_total": len(parents),
+            "approved_total": sum(r["approved"] for r in rows),
+            "stage_counts": dict(Counter(r["max_clinical_stage_for_target"] for r in rows)),
             "licence_note": "Drug and mechanism data derive from ChEMBL (CC BY-SA 3.0).",
         }
+        if offset == 0:  # explained once, not on every page
+            payload["stage_note"] = STAGE_NOTE
         if dz:
             payload["disease"] = self._disease_block(dz)
             payload["disease_scope"] = "this disease and its descendants"
@@ -308,7 +348,12 @@ class OpenTargetsService:
             weights.append({"id": datasource, "weight": 1.0, "propagate": True, "required": True})
         data = await self._q(
             Q.DISEASE_TARGETS,
-            {"disease_id": dz["id"], "size": offset + limit, "datasources": weights},
+            {
+                "disease_id": dz["id"],
+                "size": offset + limit,
+                "datasources": weights,
+                "order": datasource or "score",
+            },
         )
         conn = ((data.get("disease") or {}).get("associatedTargets")) or {}
         rows = [
@@ -324,11 +369,13 @@ class OpenTargetsService:
         payload: dict[str, Any] = {
             "disease": self._disease_block(dz),
             "filters": {"datasource": datasource} if datasource else {},
+            "ranked_by": datasource or "score",
             "targets": rows,
             **page_block(
                 total=int(conn.get("count") or 0), returned=len(rows), limit=limit, offset=offset
             ),
-            "score_note": "Association score recomputed by Open Targets with every "
+            "score_note": (f"Ordered by datasource_scores.{datasource}; " if datasource else "")
+            + "`score` is the association score recomputed by Open Targets with every "
             "non-served datasource at weight 0; targets supported only by those score 0.",
         }
         if not rows:
@@ -347,7 +394,7 @@ class OpenTargetsService:
     ) -> dict[str, Any]:
         """Evidence rows linking a target to a disease (or to any disease) from served sources."""
         _limit(limit, MAX_LIMIT)
-        if cursor is not None and not CURSOR.fullmatch(cursor):
+        if cursor is not None and (not CURSOR.fullmatch(cursor) or _position(cursor) is None):
             raise InvalidInputError(
                 "`cursor` must be the `next_cursor` of a previous call.", field="cursor"
             )

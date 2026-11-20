@@ -76,6 +76,13 @@ async def test_off_allowlist_datasource_is_invalid_input_with_allowed_values(fac
     assert (
         "intogen" in body["allowed_values"] and "cancer_gene_census" not in body["allowed_values"]
     )
+    assert "not served" in body["message"] and "COSMIC" in body["message"]
+
+
+async def test_unknown_datasource_gets_no_exclusion_reason(facade: Any) -> None:
+    args = {"disease": "MONDO_0005105", "datasource": "zzz"}
+    body = (await _raw(facade, "search_disease_targets", args)).structured_content
+    assert body["error_code"] == "invalid_input" and "not served" not in body["message"]
 
 
 async def test_over_cap_limit_suggests_the_clamped_call(facade: Any) -> None:
@@ -88,11 +95,11 @@ async def test_over_cap_limit_suggests_the_clamped_call(facade: Any) -> None:
 
 
 async def test_foreign_gene_id_is_rejected_with_a_converter(facade: Any) -> None:
-    res = await _raw(facade, "get_drug_candidates", {"target": "HGNC:1097"})
+    res = await _raw(facade, "get_drug_candidates", {"target": "NCBIGene:673"})
     body = res.structured_content
     assert res.is_error is True and body["field"] == "target" and body["allowed_values"]
     assert body["_meta"]["next_commands"] == [
-        {"tool": "hgnc_resolve_symbol", "arguments": {"query": "HGNC:1097"}}
+        {"tool": "hgnc_resolve_symbol", "arguments": {"query": "NCBIGene:673"}}
     ]
 
 
@@ -118,3 +125,11 @@ async def test_descriptions_name_only_returned_fields(facade: Any, call_tool: An
     assert "diseases" in drug
     ranked = await call_tool(facade, "search_disease_targets", {"disease": "MONDO_0005105"})
     assert {"targets", "total"} <= set(ranked) and "datasource_scores" in ranked["targets"][0]
+
+
+async def test_rejected_arguments_count_as_errors_in_diagnostics(facade: Any) -> None:
+    from opentargets_link.mcp import metrics
+
+    before = metrics.snapshot()["errors"]
+    await _raw(facade, "get_drug_candidates", {"target": "BRAF", "limit": 500})
+    assert metrics.snapshot()["errors"] == before + 1

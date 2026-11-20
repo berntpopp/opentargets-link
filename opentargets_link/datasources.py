@@ -36,18 +36,19 @@ Datasource = Literal[
 ]
 ALLOWED: tuple[str, ...] = get_args(Datasource)
 
-#: Known upstream datasources that are not served; their weight is forced to 0 in scores.
-EXCLUDED: tuple[str, ...] = (
-    "cancer_gene_census",
-    "genomics_england",
-    "crispr",
-    "europepmc",
-    "cancer_biomarkers",
-    "crispr_screen",
-    "ot_crispr",
-    "ot_crispr_validation",
-    "encore",
-)
+#: Known upstream datasources that are not served (-> why); their weight is forced to 0.
+_COMMERCIAL = "licensed to Open Targets users only, not to a third-party gateway"
+EXCLUDED: dict[str, str] = {
+    "cancer_gene_census": f"COSMIC Cancer Gene Census is {_COMMERCIAL}",
+    "genomics_england": f"Genomics England PanelApp is {_COMMERCIAL}",
+    "crispr": f"Project Score is {_COMMERCIAL}",
+    "europepmc": "Europe PMC text mining covers CC BY-NC publications",
+    "cancer_biomarkers": "Cancer Genome Interpreter biomarkers have conflicting licence terms",
+    "crispr_screen": "no licence is listed by Open Targets",
+    "ot_crispr": "Open Targets partner-only data",
+    "ot_crispr_validation": "Open Targets partner-only data",
+    "encore": "Open Targets partner-only data",
+}
 
 #: ``datasources`` input for association queries: excluded sources contribute nothing.
 ZERO_WEIGHTS: list[dict[str, object]] = [

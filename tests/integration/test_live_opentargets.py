@@ -73,7 +73,22 @@ async def test_live_braf_acceptance(service: OpenTargetsService) -> None:
     assert "Approved Drug" in tract["tractability"]["SM"]["true"]
     drugs = await service.get_drug_candidates("BRAF", disease="melanoma", limit=20)
     assert {"VEMURAFENIB", "DABRAFENIB"} <= {d["drug_name"] for d in drugs["drug_candidates"]}
+    assert drugs["parent_drugs_total"] < drugs["total"]  # dabrafenib mesylate folds into dabrafenib
+    ranked = await service.search_disease_targets(MELANOMA, limit=1)  # orderByScore "score"
+    assert ranked["ranked_by"] == "score" and ranked["targets"]
+    uk = await service.search_disease_targets("Oesophageal carcinoma", limit=1)
+    assert uk["disease"]["resolved_from"] == "Oesophageal carcinoma"
     evidence = await service.get_target_disease_evidence("BRAF", disease=MELANOMA, limit=50)
     sources = {e["datasource_id"] for e in evidence["evidence"]}
     assert "intogen" in sources and "cancer_gene_census" not in sources
     assert "filtered_out" not in evidence  # upstream honoured the datasource allowlist
+
+
+async def test_live_cursor_pages_to_the_end(service: OpenTargetsService) -> None:
+    """Guards the decoded cursor format: 8 IntOGen rows page 5 + 3, then stop."""
+    args = {"disease": MELANOMA, "datasource": "intogen", "limit": 5}
+    first = await service.get_target_disease_evidence(BRAF, **args)  # type: ignore[arg-type]
+    assert first["truncated"] and first["next_cursor"]
+    last = await service.get_target_disease_evidence(BRAF, **args, cursor=first["next_cursor"])  # type: ignore[arg-type]
+    assert first["returned"] + last["returned"] == first["total"]
+    assert not last["truncated"] and last["next_cursor"] is None
