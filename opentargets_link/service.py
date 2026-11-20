@@ -373,7 +373,8 @@ class OpenTargetsService:
             **page_block(
                 total=int(conn.get("count") or 0), returned=len(rows), limit=limit, offset=offset
             ),
-            "score_note": "Association score recomputed by Open Targets with every "
+            "score_note": (f"Ordered by datasource_scores.{datasource}; " if datasource else "")
+            + "`score` is the association score recomputed by Open Targets with every "
             "non-served datasource at weight 0; targets supported only by those score 0.",
         }
         if not rows:

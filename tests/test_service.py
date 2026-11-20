@@ -126,6 +126,7 @@ async def test_disease_targets_datasource_filter_is_required(
         "datasources"
     ]
     assert sent["order"] == "intogen" and p["ranked_by"] == "intogen"  # not the overall score
+    assert "datasource_scores.intogen" in p["score_note"]  # `score` is not the sort key here
 
 
 @pytest.mark.parametrize("value", ["OMIM:155600", "DOID:1909"])
