@@ -196,8 +196,9 @@ def register_opentargets_tools(mcp: FastMCP) -> None:
         description=(
             "Return targets associated with a disease, ranked by Open Targets association "
             "score recomputed from served datasources only, with per-datasource scores. "
-            "datasource='intogen' lists somatic cancer drivers; 'gene_burden' or "
-            "'gwas_credible_sets' germline signals. `total` is exact. "
+            "datasource= keeps targets with that source and ranks by its score (ranked_by): "
+            "'intogen' somatic cancer drivers; 'gene_burden' or 'gwas_credible_sets' germline "
+            "signals. `total` is exact. "
             "Signature: search_disease_targets(disease, datasource=, limit=, offset=)."
         ),
     )

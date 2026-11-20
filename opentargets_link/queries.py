@@ -79,10 +79,12 @@ query DiseaseGet($disease_id: String!) {
 """
 
 DISEASE_TARGETS = """
-query DiseaseTargets($disease_id: String!, $size: Int!, $datasources: [DatasourceSettingsInput!]) {
+query DiseaseTargets($disease_id: String!, $size: Int!, $datasources: [DatasourceSettingsInput!],
+  $order: String) {
   disease(efoId: $disease_id) {
     id name
-    associatedTargets(page: {index: 0, size: $size}, datasources: $datasources) {
+    associatedTargets(page: {index: 0, size: $size}, datasources: $datasources,
+      orderByScore: $order) {
       count
       rows { score target { id approvedSymbol approvedName } datasourceScores { id score } }
     }

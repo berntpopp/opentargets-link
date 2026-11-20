@@ -329,7 +329,12 @@ class OpenTargetsService:
             weights.append({"id": datasource, "weight": 1.0, "propagate": True, "required": True})
         data = await self._q(
             Q.DISEASE_TARGETS,
-            {"disease_id": dz["id"], "size": offset + limit, "datasources": weights},
+            {
+                "disease_id": dz["id"],
+                "size": offset + limit,
+                "datasources": weights,
+                "order": datasource or "score",
+            },
         )
         conn = ((data.get("disease") or {}).get("associatedTargets")) or {}
         rows = [
@@ -345,6 +350,7 @@ class OpenTargetsService:
         payload: dict[str, Any] = {
             "disease": self._disease_block(dz),
             "filters": {"datasource": datasource} if datasource else {},
+            "ranked_by": datasource or "score",
             "targets": rows,
             **page_block(
                 total=int(conn.get("count") or 0), returned=len(rows), limit=limit, offset=offset

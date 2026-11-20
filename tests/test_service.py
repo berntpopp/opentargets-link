@@ -109,14 +109,18 @@ async def test_disease_targets_zero_weight_excluded_sources_and_filter_scores(
     for row in p["targets"]:
         assert not {"cancer_gene_census", "europepmc", "crispr"} & set(row["datasource_scores"])
     assert p["total"] > 1000 and p["truncated"]
+    assert _sent(mocked_ot, "DiseaseTargets")[0]["order"] == "score" == p["ranked_by"]
 
 
 async def test_disease_targets_datasource_filter_is_required(
     ot_service: OpenTargetsService, mocked_ot: respx.MockRouter
 ) -> None:
-    await ot_service.search_disease_targets(MELANOMA, datasource="intogen")
-    sent = _sent(mocked_ot, "DiseaseTargets")[0]["datasources"]
-    assert {"id": "intogen", "weight": 1.0, "propagate": True, "required": True} in sent
+    p = await ot_service.search_disease_targets(MELANOMA, datasource="intogen")
+    sent = _sent(mocked_ot, "DiseaseTargets")[0]
+    assert {"id": "intogen", "weight": 1.0, "propagate": True, "required": True} in sent[
+        "datasources"
+    ]
+    assert sent["order"] == "intogen" and p["ranked_by"] == "intogen"  # not the overall score
 
 
 @pytest.mark.parametrize("value", ["OMIM:155600", "DOID:1909"])
