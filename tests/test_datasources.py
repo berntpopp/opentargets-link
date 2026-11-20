@@ -17,7 +17,7 @@ MUST_NEVER_SERVE = {
 
 def test_allowlist_never_contains_licence_gated_sources() -> None:
     assert not MUST_NEVER_SERVE & set(ALLOWED)
-    assert MUST_NEVER_SERVE <= set(EXCLUDED)
+    assert set(EXCLUDED) >= MUST_NEVER_SERVE
     assert not set(ALLOWED) & set(EXCLUDED)
 
 
