@@ -301,3 +301,15 @@ def test_p_value_is_one_float_not_mantissa_and_exponent() -> None:
     raw = {"id": "e1", "pValueMantissa": 5.253, "pValueExponent": -20, "oddsRatio": 9.8}
     row = evidence_row(raw, "compact")
     assert row["p_value"] == 5.253e-20 and "p_value_mantissa" not in row
+
+
+def test_compact_rows_round_float_noise_and_drop_derivable_fields() -> None:
+    from opentargets_link.shaping import evidence_row
+
+    raw = {"id": "e1", "datasourceId": "gene_burden", "datatypeId": "genetic_association"}
+    raw |= {"oddsRatio": 9.81350040435791, "pValueMantissa": 5.253, "pValueExponent": -20}
+    compact = evidence_row(raw, "compact")
+    assert compact["odds_ratio"] == 9.814 and compact["p_value"] == 5.253e-20
+    assert "datatype_id" not in compact and "datatype_id" not in evidence_row(raw, "minimal")
+    standard = evidence_row(raw, "standard")  # standard and full keep upstream values verbatim
+    assert standard["odds_ratio"] == 9.81350040435791 and standard["datatype_id"]

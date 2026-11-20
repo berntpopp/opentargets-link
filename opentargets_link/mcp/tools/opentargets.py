@@ -48,7 +48,11 @@ Offset = Annotated[
 ]
 Mode = Annotated[
     Literal["minimal", "compact", "standard", "full"],
-    Field(description="Row detail; default compact."),
+    Field(
+        description="Row detail. minimal: IDs, stage or score, disease, variant; compact "
+        "(default): key fields, floats to 4 significant digits; standard: upstream values "
+        "verbatim (+ literature, drug mechanism); full: + top 3 drug clinical reports."
+    ),
 ]
 
 

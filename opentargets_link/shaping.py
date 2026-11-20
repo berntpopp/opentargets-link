@@ -184,7 +184,7 @@ def _snake(name: str) -> str:
     return re.sub(r"(?<!^)(?=[A-Z])", "_", name).lower()
 
 
-_MINIMAL = ("id", "datasource_id", "datatype_id", "score", "disease", "variant")
+_MINIMAL = ("id", "datasource_id", "score", "disease", "variant")
 
 
 def evidence_row(raw: dict[str, Any], mode: str) -> dict[str, Any]:
@@ -201,6 +201,11 @@ def evidence_row(raw: dict[str, Any], mode: str) -> dict[str, Any]:
     mantissa, exponent = out.pop("p_value_mantissa", None), out.pop("p_value_exponent", None)
     if mantissa is not None and exponent is not None:
         out["p_value"] = float(f"{mantissa}e{exponent}")
+    if mode in ("standard", "full"):
+        return out
+    out.pop("datatype_id", None)  # implied by datasource_id
+    # Upstream floats are float32 noise past 4 significant digits (OR 9.81350040435791).
+    out = {k: float(f"{v:.4g}") if isinstance(v, float) else v for k, v in out.items()}
     if mode == "minimal":
         return {k: out[k] for k in _MINIMAL if k in out}
     return out
