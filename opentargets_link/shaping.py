@@ -184,7 +184,7 @@ def _snake(name: str) -> str:
     return re.sub(r"(?<!^)(?=[A-Z])", "_", name).lower()
 
 
-_MINIMAL = ("id", "datasource_id", "datatype_id", "score", "disease")
+_MINIMAL = ("id", "datasource_id", "datatype_id", "score", "disease", "variant")
 
 
 def evidence_row(raw: dict[str, Any], mode: str) -> dict[str, Any]:

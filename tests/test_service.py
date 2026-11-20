@@ -273,3 +273,10 @@ def test_gwas_credible_set_rows_carry_study_lead_variant_and_p_value() -> None:
     row = evidence_row({"datasourceId": "gwas_credible_sets", "credibleSet": cs}, "compact")
     assert row["credible_set"]["study"]["pubmedId"] == "32887889"
     assert row["credible_set"]["variant"]["assembly"] == "GRCh38"
+
+
+def test_minimal_evidence_rows_keep_the_variant_id() -> None:
+    from opentargets_link.shaping import evidence_row
+
+    raw = {"id": "e1", "datasourceId": "eva_somatic", "variant": {"id": "7_140753336_A_T"}}
+    assert evidence_row(raw, "minimal")["variant"]["id"] == "7_140753336_A_T"
