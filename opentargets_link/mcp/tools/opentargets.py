@@ -30,14 +30,14 @@ _Disease = Annotated[str, Field(min_length=2, max_length=200)]
 DiseaseArg = Annotated[
     _Disease,
     Field(
-        description="MONDO/EFO ID (MONDO_0005105) or disease name (melanoma, top match is "
+        description="MONDO/EFO/HP ID (MONDO_0005105) or disease name (melanoma, top match is "
         "reported as resolved_from); covers descendants.",
         examples=["MONDO_0005105"],
     ),
 ]
 OptDisease = Annotated[
     _Disease | None,
-    Field(description="Only this disease and its descendants (MONDO/EFO ID or name)."),
+    Field(description="Only this disease and its descendants (MONDO/EFO/HP ID or name)."),
 ]
 OptSource = Annotated[
     Datasource | None,

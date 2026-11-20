@@ -54,7 +54,7 @@ GENE_FORMS = [
     "HGNC symbol (BRAF)",
     "HGNC ID (HGNC:1097)",
 ]
-DISEASE_FORMS = ["MONDO/EFO/Orphanet ID (MONDO_0005105 or MONDO:0005105)", "disease name"]
+DISEASE_FORMS = ["MONDO/EFO/Orphanet/HP ID (MONDO_0005105 or MONDO:0005105)", "disease name"]
 HGNC_HINT = (
     "hgnc_resolve_symbol runs on the GeneFoundry hgnc server (call it through the genefoundry "
     "router); standalone, pass the approved HGNC symbol or the Ensembl gene ID."
@@ -177,7 +177,7 @@ class OpenTargetsService:
         term = " ".join(value.split())
         if FOREIGN_DISEASE.match(term):
             raise InvalidInputError(
-                "`disease` takes a MONDO/EFO/Orphanet ID or a disease name; convert OMIM, "
+                "`disease` takes a MONDO/EFO/Orphanet/HP ID or a disease name; convert OMIM, "
                 "DOID and other IDs to MONDO first.",
                 field="disease",
                 allowed_values=DISEASE_FORMS,
@@ -189,6 +189,9 @@ class OpenTargetsService:
         resolved_from = None
         if disease_id is None:
             hits = await self._map(term, "disease")
+            us = term.replace("ae", "e").replace("oe", "e")  # haem-, oesophag-, -aemia
+            if not hits and us != term:
+                hits = await self._map(us, "disease")
             if not hits:
                 raise self._no_disease(term)
             disease_id, resolved_from = str(hits[0]["id"]), term

@@ -57,7 +57,7 @@ def build_capabilities() -> dict[str, Any]:
         "identifiers": {
             "target": "Ensembl gene ID (ENSG00000157764), HGNC symbol (BRAF) or HGNC ID "
             "(HGNC:1097); NCBI Gene IDs are rejected with hgnc_resolve_symbol",
-            "disease": "MONDO/EFO/Orphanet ID (MONDO_0005105, MONDO:0005105) or a name "
+            "disease": "MONDO/EFO/Orphanet/HP ID (MONDO_0005105, MONDO:0005105) or a name "
             "(top Open Targets match, reported as resolved_from); OMIM/DOID are rejected "
             "with mondo_resolve_disease",
             "drug": "ChEMBL ID (CHEMBL1229517)",
