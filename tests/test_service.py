@@ -313,3 +313,12 @@ def test_compact_rows_round_float_noise_and_drop_derivable_fields() -> None:
     assert "datatype_id" not in compact and "datatype_id" not in evidence_row(raw, "minimal")
     standard = evidence_row(raw, "standard")  # standard and full keep upstream values verbatim
     assert standard["odds_ratio"] == 9.81350040435791 and standard["datatype_id"]
+
+
+def test_credible_set_gets_the_same_p_value_and_rounding_as_the_row() -> None:
+    from opentargets_link.shaping import evidence_row
+
+    cs = {"pValueMantissa": 2.011000394821167, "pValueExponent": -7, "beta": -0.0077454657}
+    row = evidence_row({"id": "e1", "credibleSet": cs}, "compact")["credible_set"]
+    assert row["p_value"] == 2.011e-7 and row["beta"] == -0.007745
+    assert "pValueMantissa" not in row

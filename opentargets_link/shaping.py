@@ -187,25 +187,35 @@ def _snake(name: str) -> str:
 _MINIMAL = ("id", "datasource_id", "score", "disease", "variant")
 
 
+def _p_and_floats(d: dict[str, Any], mantissa: str, exponent: str, round_: bool) -> dict[str, Any]:
+    """One ``p_value`` float from mantissa/exponent; floats to 4 significant digits if asked.
+
+    Upstream floats are float32 noise past 4 significant digits (OR 9.81350040435791).
+    """
+    m, e = d.pop(mantissa, None), d.pop(exponent, None)
+    if m is not None and e is not None:
+        d["p_value"] = float(f"{m}e{e}")
+    return {k: float(f"{v:.4g}") if round_ and isinstance(v, float) else v for k, v in d.items()}
+
+
 def evidence_row(raw: dict[str, Any], mode: str) -> dict[str, Any]:
     """One evidence row: non-empty upstream fields in snake_case, variants labelled GRCh38."""
+    compact = mode in ("minimal", "compact")
     out: dict[str, Any] = {}
     for key, value in raw.items():
         if value is None or value == [] or (key == "literature" and mode == "compact"):
             continue
         if key == "variant":
             value = {"id": value.get("id"), "assembly": "GRCh38"}
-        if key == "credibleSet" and value.get("variant"):
-            value = {**value, "variant": {**value["variant"], "assembly": "GRCh38"}}
+        if key == "credibleSet":
+            if value.get("variant"):
+                value = {**value, "variant": {**value["variant"], "assembly": "GRCh38"}}
+            value = _p_and_floats(dict(value), "pValueMantissa", "pValueExponent", compact)
         out[_snake(key)] = value
-    mantissa, exponent = out.pop("p_value_mantissa", None), out.pop("p_value_exponent", None)
-    if mantissa is not None and exponent is not None:
-        out["p_value"] = float(f"{mantissa}e{exponent}")
-    if mode in ("standard", "full"):
+    out = _p_and_floats(out, "p_value_mantissa", "p_value_exponent", compact)
+    if not compact:
         return out
     out.pop("datatype_id", None)  # implied by datasource_id
-    # Upstream floats are float32 noise past 4 significant digits (OR 9.81350040435791).
-    out = {k: float(f"{v:.4g}") if isinstance(v, float) else v for k, v in out.items()}
     if mode == "minimal":
         return {k: out[k] for k in _MINIMAL if k in out}
     return out
