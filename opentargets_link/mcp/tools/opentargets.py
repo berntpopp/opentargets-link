@@ -22,7 +22,7 @@ Target = Annotated[
     Field(
         min_length=1,
         max_length=40,
-        description="Ensembl gene ID (ENSG00000157764) or HGNC symbol (BRAF).",
+        description="Ensembl gene ID (ENSG00000157764), HGNC symbol (BRAF) or HGNC ID.",
         examples=["BRAF"],
     ),
 ]
@@ -112,7 +112,7 @@ def register_opentargets_tools(mcp: FastMCP) -> None:
             Field(
                 min_length=1,
                 max_length=40,
-                description="HGNC symbol, alias or Ensembl gene ID.",
+                description="HGNC symbol, alias, HGNC ID or Ensembl gene ID.",
                 examples=["BRAF"],
             ),
         ],

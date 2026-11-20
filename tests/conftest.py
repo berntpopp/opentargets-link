@@ -48,6 +48,7 @@ def _fixture_for(op: str, v: dict[str, Any]) -> str:
     if op == "MapIds":
         hits = {
             ("target", "BRAF"): "map_braf",
+            ("target", "HGNC:1097"): "map_hgnc_braf",
             ("target", "HER2"): "map_her2",
             ("disease", "melanoma"): "map_melanoma",
         }

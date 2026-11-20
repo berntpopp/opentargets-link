@@ -40,7 +40,12 @@ async def test_alias_resolves_and_says_so(ot_service: OpenTargetsService) -> Non
     assert hit == ("ENSG00000141736", "HER2")
 
 
-@pytest.mark.parametrize("value", ["HGNC:1097", "NCBIGene:673", "673"])
+async def test_hgnc_id_resolves_through_open_targets(ot_service: OpenTargetsService) -> None:
+    p = await ot_service.get_target_tractability("HGNC:1097")
+    assert p["target"]["id"] == BRAF and p["target"]["resolved_from"] == "HGNC:1097"
+
+
+@pytest.mark.parametrize("value", ["NCBIGene:673", "673"])
 async def test_foreign_gene_ids_point_to_hgnc(ot_service: OpenTargetsService, value: str) -> None:
     with pytest.raises(InvalidInputError) as info:
         await ot_service.get_target_tractability(value)
@@ -213,7 +218,7 @@ async def test_resolve_target_errors_name_query_and_never_loop(
     ot_service: OpenTargetsService,
 ) -> None:
     with pytest.raises(InvalidInputError) as bad:
-        await ot_service.resolve_target("HGNC:1097")
+        await ot_service.resolve_target("673")
     assert bad.value.extra["field"] == "query"
     with pytest.raises(NotFoundError) as missing:
         await ot_service.resolve_target("ENSG00000000001")

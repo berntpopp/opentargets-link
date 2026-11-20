@@ -95,11 +95,11 @@ async def test_over_cap_limit_suggests_the_clamped_call(facade: Any) -> None:
 
 
 async def test_foreign_gene_id_is_rejected_with_a_converter(facade: Any) -> None:
-    res = await _raw(facade, "get_drug_candidates", {"target": "HGNC:1097"})
+    res = await _raw(facade, "get_drug_candidates", {"target": "NCBIGene:673"})
     body = res.structured_content
     assert res.is_error is True and body["field"] == "target" and body["allowed_values"]
     assert body["_meta"]["next_commands"] == [
-        {"tool": "hgnc_resolve_symbol", "arguments": {"query": "HGNC:1097"}}
+        {"tool": "hgnc_resolve_symbol", "arguments": {"query": "NCBIGene:673"}}
     ]
 
 

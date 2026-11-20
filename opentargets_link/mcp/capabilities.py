@@ -55,8 +55,8 @@ def build_capabilities() -> dict[str, Any]:
         "(https://api.platform.opentargets.org/api/v4/graphql), live, fixed queries only",
         "tested_data_version": TESTED_DATA_VERSION,
         "identifiers": {
-            "target": "Ensembl gene ID (ENSG00000157764) or HGNC symbol (BRAF); HGNC/NCBI "
-            "Gene IDs are rejected with hgnc_resolve_symbol",
+            "target": "Ensembl gene ID (ENSG00000157764), HGNC symbol (BRAF) or HGNC ID "
+            "(HGNC:1097); NCBI Gene IDs are rejected with hgnc_resolve_symbol",
             "disease": "MONDO/EFO/Orphanet ID (MONDO_0005105, MONDO:0005105) or a name "
             "(top Open Targets match, reported as resolved_from); OMIM/DOID are rejected "
             "with mondo_resolve_disease",

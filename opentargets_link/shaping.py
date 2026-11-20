@@ -31,7 +31,8 @@ NO_EVIDENCE = (
 
 #: Argument forms.
 ENSEMBL_GENE = re.compile(r"^ENSG\d{11}(?:\.\d+)?$", re.IGNORECASE)
-FOREIGN_GENE = re.compile(r"^(?:HGNC:\d+|(?:NCBIGene|Entrez(?:Gene)?):\d+|\d{1,9})$", re.I)
+FOREIGN_GENE = re.compile(r"^(?:(?:NCBIGene|Entrez(?:Gene)?):\d+|\d{1,9})$", re.I)
+HGNC_ID = re.compile(r"^HGNC:\d{1,7}$", re.I)  # Open Targets mapIds resolves these itself
 SYMBOL = re.compile(r"^[A-Za-z0-9][A-Za-z0-9.\-_@]{0,29}$")
 DISEASE_ID = re.compile(r"^(MONDO|EFO|Orphanet|HP|OTAR|OBA)[_:](\d{1,9})$", re.IGNORECASE)
 FOREIGN_DISEASE = re.compile(r"^(?:OMIM|MIM|DOID|ORPHA|ICD10|ICD-?10|UMLS|MESH|NCIT):", re.I)

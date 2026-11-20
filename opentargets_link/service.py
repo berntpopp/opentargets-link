@@ -28,6 +28,7 @@ from opentargets_link.shaping import (
     ENSEMBL_GENE,
     FOREIGN_DISEASE,
     FOREIGN_GENE,
+    HGNC_ID,
     NO_DRUGS,
     NO_EVIDENCE,
     NOT_A_REPORT,
@@ -47,7 +48,11 @@ DEFAULT_LIMIT = 10
 MAX_LIMIT = 50
 DRUG_MAX_LIMIT = 20  # full mode fences 1 + 3 texts per row; stay under the 128-fence ceiling
 ASSOC_MAX_WINDOW = 3000  # Open Targets' largest page
-GENE_FORMS = ["Ensembl gene ID (ENSG00000157764)", "HGNC symbol (BRAF)"]
+GENE_FORMS = [
+    "Ensembl gene ID (ENSG00000157764)",
+    "HGNC symbol (BRAF)",
+    "HGNC ID (HGNC:1097)",
+]
 DISEASE_FORMS = ["MONDO/EFO/Orphanet ID (MONDO_0005105 or MONDO:0005105)", "disease name"]
 HGNC_HINT = (
     "hgnc_resolve_symbol runs on the GeneFoundry hgnc server (call it through the genefoundry "
@@ -129,7 +134,7 @@ class OpenTargetsService:
             return term.split(".")[0].upper(), None
         if FOREIGN_GENE.fullmatch(term):
             raise InvalidInputError(
-                f"`{field}` takes an Ensembl gene ID or an HGNC symbol, not an HGNC or NCBI "
+                f"`{field}` takes an Ensembl gene ID, HGNC symbol or HGNC ID, not an NCBI "
                 "Gene ID; convert it first.",
                 field=field,
                 allowed_values=GENE_FORMS,
@@ -137,7 +142,9 @@ class OpenTargetsService:
                 next_commands=[cmd("hgnc_resolve_symbol", query=term)],
                 recovery_action="reformulate_input",
             )
-        if not SYMBOL.fullmatch(term):
+        if HGNC_ID.fullmatch(term):
+            term = term.upper()
+        elif not SYMBOL.fullmatch(term):
             raise InvalidInputError(
                 f"`{field}` must be an Ensembl gene ID or an HGNC symbol.",
                 field=field,
