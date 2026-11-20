@@ -37,9 +37,11 @@ DISEASE_ID = re.compile(r"^(MONDO|EFO|Orphanet|HP|OTAR|OBA)[_:](\d{1,9})$", re.I
 FOREIGN_DISEASE = re.compile(r"^(?:OMIM|MIM|DOID|ORPHA|ICD10|ICD-?10|UMLS|MESH|NCIT):", re.I)
 CURSOR = re.compile(r"^[A-Za-z0-9+/=_-]{1,200}$")
 
-#: Clinical stages, most advanced first (Open Targets enum strings).
+#: Clinical stages, most advanced first (Open Targets enum strings). WITHDRAWAL was approved
+#: somewhere first, so it ranks just below APPROVAL, not after PHASE_1.
 STAGES = (
     "APPROVAL",
+    "WITHDRAWAL",
     "PHASE_4",
     "PHASE_3",
     "PHASE_2_3",

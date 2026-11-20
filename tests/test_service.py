@@ -209,3 +209,9 @@ def test_cache_default_is_bounded_for_large_ot_payloads() -> None:
     from opentargets_link.config import OpenTargetsSettings
 
     assert OpenTargetsSettings().cache_maxsize <= 128
+
+
+def test_withdrawn_drugs_sort_with_approved_not_after_phase_1() -> None:
+    from opentargets_link.shaping import stage_rank
+
+    assert stage_rank("APPROVAL") < stage_rank("WITHDRAWAL") < stage_rank("PHASE_4")
