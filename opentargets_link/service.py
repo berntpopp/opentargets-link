@@ -32,6 +32,7 @@ from opentargets_link.shaping import (
     NO_EVIDENCE,
     NOT_A_REPORT,
     SITE,
+    STAGE_NOTE,
     SYMBOL,
     allowed_scores,
     disease_curie,
@@ -294,6 +295,7 @@ class OpenTargetsService:
             "drug_candidates": page,
             **page_block(total=len(rows), returned=len(page), limit=limit, offset=offset),
             "licence_note": "Drug and mechanism data derive from ChEMBL (CC BY-SA 3.0).",
+            "stage_note": STAGE_NOTE,
         }
         if dz:
             payload["disease"] = self._disease_block(dz)

@@ -42,7 +42,7 @@ query Tractability($target_id: String!) {{
 _DRUG_ROW = """
   maxClinicalStage
   drug {
-    id name drugType maximumClinicalStage
+    id name drugType maximumClinicalStage parentMolecule { id }
     mechanismsOfAction { rows { mechanismOfAction actionType targets { id } } }
   }
   diseases { disease { id name } }

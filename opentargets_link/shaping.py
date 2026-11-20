@@ -37,12 +37,9 @@ DISEASE_ID = re.compile(r"^(MONDO|EFO|Orphanet|HP|OTAR|OBA)[_:](\d{1,9})$", re.I
 FOREIGN_DISEASE = re.compile(r"^(?:OMIM|MIM|DOID|ORPHA|ICD10|ICD-?10|UMLS|MESH|NCIT):", re.I)
 CURSOR = re.compile(r"^[A-Za-z0-9+/=_-]{1,200}$")
 
-#: Clinical stages, most advanced first (Open Targets enum strings). WITHDRAWAL was approved
-#: somewhere first, so it ranks just below APPROVAL, not after PHASE_1.
+#: Clinical stages, most advanced first (Open Targets enum strings).
 STAGES = (
     "APPROVAL",
-    "WITHDRAWAL",
-    "PHASE_4",
     "PHASE_3",
     "PHASE_2_3",
     "PHASE_2",
@@ -52,10 +49,23 @@ STAGES = (
     "PRECLINICAL",
     "UNKNOWN",
 )
+#: Open Targets ranks WITHDRAWAL > PHASE_4 (post-marketing) > APPROVAL when it picks a drug's
+#: stage for a target, so an approved drug with phase-4 trials shows PHASE_4. All three mean
+#: the drug reached approval; they share the APPROVAL tier.
+APPROVED_STAGES = frozenset({"APPROVAL", "PHASE_4", "WITHDRAWAL"})
+STAGE_NOTE = (
+    "max_clinical_stage_for_target is Open Targets' highest stage for this drug and target; "
+    "Open Targets ranks WITHDRAWAL above PHASE_4 (post-marketing trials) above APPROVAL, so "
+    "all three mean the drug was approved somewhere (approved=true). drug_max_clinical_stage "
+    "covers any target. Salt forms (e.g. DABRAFENIB MESYLATE) are separate ChEMBL records; "
+    "parent_drug_id links them. Stages lag regulators and are not indication-specific."
+)
 
 
 def stage_rank(stage: Any) -> int:
     """Sort key: lower is more advanced; unknown strings sort last."""
+    if stage in APPROVED_STAGES:
+        return 0
     return STAGES.index(stage) if stage in STAGES else len(STAGES)
 
 
@@ -118,9 +128,12 @@ def drug_row(
         "drug_id": drug.get("id"),
         "drug_name": drug.get("name"),
         "max_clinical_stage_for_target": raw.get("maxClinicalStage"),
+        "approved": raw.get("maxClinicalStage") in APPROVED_STAGES,
     }
     if mode == "minimal":
         return out
+    if parent := (drug.get("parentMolecule") or {}).get("id"):
+        out["parent_drug_id"] = parent
     moa = [
         m
         for m in (drug.get("mechanismsOfAction") or {}).get("rows") or []

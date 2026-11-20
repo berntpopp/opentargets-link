@@ -75,7 +75,7 @@ async def test_braf_melanoma_drug_candidates_include_vemurafenib_and_dabrafenib(
     assert p["total"] < 18  # the disease filter removed drugs never studied in melanoma
     assert "ARQ-736" not in names
     stages = [r["max_clinical_stage_for_target"] for r in p["drug_candidates"]]
-    assert stages[0] == "APPROVAL"
+    assert p["drug_candidates"][0]["approved"] and stages[0] in {"APPROVAL", "PHASE_4"}
     assert all("clinical_reports" not in r for r in p["drug_candidates"])
     assert "ChEMBL (CC BY-SA 3.0)" in p["licence_note"]
 
@@ -216,10 +216,28 @@ def test_cache_default_is_bounded_for_large_ot_payloads() -> None:
     assert OpenTargetsSettings().cache_maxsize <= 128
 
 
-def test_withdrawn_drugs_sort_with_approved_not_after_phase_1() -> None:
-    from opentargets_link.shaping import stage_rank
+def test_post_approval_stages_rank_and_read_as_approved() -> None:
+    """Open Targets ranks WITHDRAWAL > PHASE_4 > APPROVAL; all three mean the drug was approved."""
+    from opentargets_link.shaping import drug_row, stage_rank
 
-    assert stage_rank("APPROVAL") < stage_rank("WITHDRAWAL") < stage_rank("PHASE_4")
+    assert stage_rank("APPROVAL") == stage_rank("PHASE_4") == stage_rank("WITHDRAWAL")
+    assert stage_rank("PHASE_4") < stage_rank("PHASE_3")
+    node = {
+        "maxClinicalStage": "PHASE_4",
+        "drug": {"id": "CHEMBL2028663", "name": "DABRAFENIB", "parentMolecule": None},
+    }
+    assert drug_row(node, BRAF, "minimal", None)["approved"] is True
+    salt = {
+        "maxClinicalStage": "PHASE_3",
+        "drug": {"id": "CHEMBL2105729", "parentMolecule": {"id": "CHEMBL2028663"}},
+    }
+    row = drug_row(salt, BRAF, "compact", None)
+    assert row["approved"] is False and row["parent_drug_id"] == "CHEMBL2028663"
+
+
+async def test_drug_payload_explains_stages(ot_service: OpenTargetsService) -> None:
+    p = await ot_service.get_drug_candidates(BRAF, limit=5)
+    assert "PHASE_4" in p["stage_note"] and "Salt" in p["stage_note"]
 
 
 def test_gwas_credible_set_rows_carry_study_lead_variant_and_p_value() -> None:
