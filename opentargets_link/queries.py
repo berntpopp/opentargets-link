@@ -116,6 +116,11 @@ _EVIDENCE = """
     beta betaConfidenceIntervalLower betaConfidenceIntervalUpper
     pValueMantissa pValueExponent statisticalMethod ancestry studySampleSize projectId
     clinicalStage drug { id name }
+    credibleSet {
+      studyLocusId finemappingMethod pValueMantissa pValueExponent beta
+      study { id traitFromSource publicationFirstAuthor pubmedId nSamples }
+      variant { id rsIds }
+    }
     literature
   }
 """

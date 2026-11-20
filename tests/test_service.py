@@ -215,3 +215,20 @@ def test_withdrawn_drugs_sort_with_approved_not_after_phase_1() -> None:
     from opentargets_link.shaping import stage_rank
 
     assert stage_rank("APPROVAL") < stage_rank("WITHDRAWAL") < stage_rank("PHASE_4")
+
+
+def test_gwas_credible_set_rows_carry_study_lead_variant_and_p_value() -> None:
+    from opentargets_link import queries as Q
+    from opentargets_link.shaping import evidence_row
+
+    assert "credibleSet {" in Q.DISEASE_EVIDENCE and "credibleSet {" in Q.TARGET_EVIDENCE
+    cs = {
+        "studyLocusId": "a6ea",
+        "study": {"id": "GCST90011809", "pubmedId": "32887889", "nSamples": 417127},
+        "variant": {"id": "9_21965233_C_G", "rsIds": ["rs2188127"]},
+        "pValueMantissa": 2.01,
+        "pValueExponent": -7,
+    }
+    row = evidence_row({"datasourceId": "gwas_credible_sets", "credibleSet": cs}, "compact")
+    assert row["credible_set"]["study"]["pubmedId"] == "32887889"
+    assert row["credible_set"]["variant"]["assembly"] == "GRCh38"

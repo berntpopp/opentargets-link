@@ -181,6 +181,8 @@ def evidence_row(raw: dict[str, Any], mode: str) -> dict[str, Any]:
             continue
         if key == "variant":
             value = {"id": value.get("id"), "assembly": "GRCh38"}
+        if key == "credibleSet" and value.get("variant"):
+            value = {**value, "variant": {**value["variant"], "assembly": "GRCh38"}}
         out[_snake(key)] = value
     if mode == "minimal":
         return {k: out[k] for k in _MINIMAL if k in out}
