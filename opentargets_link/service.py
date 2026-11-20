@@ -48,6 +48,14 @@ DRUG_MAX_LIMIT = 20  # full mode fences 1 + 3 texts per row; stay under the 128-
 ASSOC_MAX_WINDOW = 3000  # Open Targets' largest page
 GENE_FORMS = ["Ensembl gene ID (ENSG00000157764)", "HGNC symbol (BRAF)"]
 DISEASE_FORMS = ["MONDO/EFO/Orphanet ID (MONDO_0005105 or MONDO:0005105)", "disease name"]
+HGNC_HINT = (
+    "hgnc_resolve_symbol runs on the GeneFoundry hgnc server (call it through the genefoundry "
+    "router); standalone, pass the approved HGNC symbol or the Ensembl gene ID."
+)
+MONDO_HINT = (
+    "mondo_resolve_disease runs on the GeneFoundry mondo server (call it through the "
+    "genefoundry router); standalone, pass the disease name, e.g. disease='melanoma'."
+)
 _FIELDS = {"target_id": "target", "disease_id": "disease", "size": "limit", "efo_ids": "disease"}
 
 
@@ -119,6 +127,7 @@ class OpenTargetsService:
                 "Gene ID; convert it first.",
                 field=field,
                 allowed_values=GENE_FORMS,
+                hint=HGNC_HINT,
                 next_commands=[cmd("hgnc_resolve_symbol", query=term)],
                 recovery_action="reformulate_input",
             )
@@ -127,6 +136,7 @@ class OpenTargetsService:
                 f"`{field}` must be an Ensembl gene ID or an HGNC symbol.",
                 field=field,
                 allowed_values=GENE_FORMS,
+                hint=HGNC_HINT,
                 next_commands=[cmd("hgnc_resolve_symbol", query=term[:60])],
             )
         hits = await self._map(term, "target")
@@ -136,7 +146,7 @@ class OpenTargetsService:
             raise NotFoundError(
                 f"No Open Targets target matches `{field}`.",
                 field=field,
-                hint="Check the symbol with hgnc_resolve_symbol, or pass an Ensembl gene ID.",
+                hint=HGNC_HINT,
                 next_commands=[cmd("hgnc_resolve_symbol", query=term)],
             )
         if len(hits) > 1:
@@ -157,6 +167,7 @@ class OpenTargetsService:
                 "DOID and other IDs to MONDO first.",
                 field="disease",
                 allowed_values=DISEASE_FORMS,
+                hint=MONDO_HINT,
                 next_commands=[cmd("mondo_resolve_disease", query=term)],
                 recovery_action="reformulate_input",
             )
@@ -169,16 +180,21 @@ class OpenTargetsService:
             disease_id, resolved_from = str(hits[0]["id"]), term
         found = (await self._q(Q.DISEASE_GET, {"disease_id": disease_id})).get("disease")
         if not found:
-            raise self._no_disease(term)
+            raise self._no_disease(term, by_id=resolved_from is None)
         return {**found, "resolved_from": resolved_from}
 
     @staticmethod
-    def _no_disease(term: str) -> NotFoundError:
+    def _no_disease(term: str, by_id: bool = False) -> NotFoundError:
+        if by_id:  # a made-up or obsolete ID: no resolver can map it
+            return NotFoundError(
+                "No Open Targets disease has this `disease` ID (obsolete or not in Open Targets).",
+                field="disease",
+                hint="Pass the disease name instead, e.g. disease='melanoma'.",
+            )
         return NotFoundError(
             "No Open Targets disease matches `disease`.",
             field="disease",
-            hint="Pass a MONDO ID (MONDO_0005105); mondo_resolve_disease maps names and "
-            "OMIM/DOID IDs to MONDO.",
+            hint=MONDO_HINT,
             next_commands=[cmd("mondo_resolve_disease", query=term)],
         )
 
@@ -194,13 +210,11 @@ class OpenTargetsService:
     ) -> tuple[dict[str, Any], str | None]:
         target_id, resolved_from = await self._target_id(target, field)
         raw = (await self._q(document, {"target_id": target_id})).get("target")
-        if not raw:
-            step = "hgnc_resolve_symbol" if field == "query" else "resolve_target"
+        if not raw:  # only an Ensembl ID reaches here (symbols resolve to existing targets)
             raise NotFoundError(
-                f"No Open Targets target has this `{field}`.",
+                f"No Open Targets target has this `{field}` (retired or not a gene ID).",
                 field=field,
-                hint="Find the Ensembl gene ID with resolve_target(query) or hgnc_resolve_symbol.",
-                next_commands=[cmd(step, query=target.strip())],
+                hint="Pass the gene symbol to resolve_target(query) for the current Ensembl ID.",
             )
         return raw, resolved_from
 

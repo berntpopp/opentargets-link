@@ -126,13 +126,16 @@ async def test_foreign_disease_ids_point_to_mondo(
     with pytest.raises(InvalidInputError) as info:
         await ot_service.search_disease_targets(value)
     assert info.value.extra["next_commands"][0]["tool"] == "mondo_resolve_disease"
+    assert "genefoundry" in info.value.extra["hint"] and "name" in info.value.extra["hint"]
 
 
 async def test_unknown_disease_is_not_found(ot_service: OpenTargetsService) -> None:
     with pytest.raises(NotFoundError):
         await ot_service.search_disease_targets("zzzz not a disease")
-    with pytest.raises(NotFoundError):
+    with pytest.raises(NotFoundError) as unknown_id:
         await ot_service.search_disease_targets("MONDO_9999999")
+    assert not unknown_id.value.extra.get("next_commands")  # mondo cannot map a made-up ID
+    assert "name" in unknown_id.value.extra["hint"]
 
 
 async def test_braf_melanoma_evidence_is_allowlisted_only(
@@ -202,7 +205,9 @@ async def test_resolve_target_errors_name_query_and_never_loop(
     with pytest.raises(NotFoundError) as missing:
         await ot_service.resolve_target("ENSG00000000001")
     assert missing.value.extra["field"] == "query"
-    assert missing.value.extra["next_commands"][0]["tool"] == "hgnc_resolve_symbol"
+    assert not missing.value.extra.get("next_commands")  # hgnc cannot map an unknown ENSG
+    assert "symbol" in missing.value.extra["hint"]
+    assert "genefoundry" in bad.value.extra["hint"]  # the sibling tool is named as such
 
 
 def test_cache_default_is_bounded_for_large_ot_payloads() -> None:
