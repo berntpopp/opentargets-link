@@ -94,8 +94,8 @@ get_target_disease_evidence(target="BRAF", disease="MONDO_0005105", datasource="
 
 **Source.** The Open Targets Platform GraphQL API at
 `https://api.platform.opentargets.org/api/v4/graphql`. No key is needed. Only
-`api.platform.opentargets.org` is ever contacted. Each payload carries `data_version` (the Open
-Targets data release from `meta.dataVersion`, e.g. `26.09`) and `retrieved_at`.
+`api.platform.opentargets.org` is ever contacted. Each data result states `source`, `data_version`
+(the Open Targets data release from `meta.dataVersion`, e.g. `26.09`) and `retrieved_at` in `_meta`.
 
 **Rate limit.** Open Targets publishes no request limit and asks bulk users to download its
 releases. The default is 0.34 s spacing process-wide (~3 req/s) plus a 20,000/UTC-day cap, an

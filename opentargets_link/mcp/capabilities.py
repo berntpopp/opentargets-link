@@ -63,8 +63,8 @@ def build_capabilities() -> dict[str, Any]:
             "drug": "ChEMBL ID (CHEMBL1229517)",
             "variant": "Open Targets variant ID chr_pos_ref_alt on GRCh38",
         },
-        "data_version": "Open Targets data release (meta.dataVersion, e.g. 26.09) on every "
-        "data payload",
+        "data_version": "Open Targets data release (meta.dataVersion, e.g. 26.09), in `_meta` "
+        "of every data result",
         "datasources": {
             "served_allowlist": list(ALLOWED),
             "excluded": list(EXCLUDED),
