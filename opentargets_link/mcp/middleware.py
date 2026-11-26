@@ -33,7 +33,7 @@ from opentargets_link.mcp.arg_help import (
     tool_signature,
 )
 from opentargets_link.mcp.envelope import build_arg_error_envelope
-from opentargets_link.mcp.next_commands import cmd
+from opentargets_link.mcp.next_commands import cmd, safe_echo
 
 logger = logging.getLogger(__name__)
 
@@ -124,9 +124,7 @@ class ArgValidationMiddleware(Middleware):
             fixed = corrected_value(loc, arguments.get(loc), field_schema)
             # Echo only real parameters, and only when nothing in them needs sanitising.
             known = {k: v for k, v in arguments.items() if k in valid}
-            blob = json.dumps(known, ensure_ascii=False, default=str)
-            # never echo unsanitised caller text
-            if sanitize_message(blob) == blob and fixed is not None:
+            if fixed is not None and all(map(safe_echo, known.values())):  # TXT-04
                 envelope["_meta"]["next_commands"] = [cmd(name, **{**known, loc: fixed})]
         # ``loc`` is a caller-controlled argument name; code-point-strip it before
         # it reaches the log sink (no raw control/zero-width/bidi/NUL in logs).

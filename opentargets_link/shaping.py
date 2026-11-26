@@ -36,6 +36,7 @@ HGNC_ID = re.compile(r"^HGNC:\d{1,7}$", re.I)  # Open Targets mapIds resolves th
 SYMBOL = re.compile(r"^[A-Za-z0-9][A-Za-z0-9.\-_@]{0,29}$")
 DISEASE_ID = re.compile(r"^(MONDO|EFO|Orphanet|HP|OTAR|OBA)[_:](\d{1,9})$", re.IGNORECASE)
 FOREIGN_DISEASE = re.compile(r"^(?:OMIM|MIM|DOID|ORPHA|ICD10|ICD-?10|UMLS|MESH|NCIT):", re.I)
+FOREIGN_DISEASE_ID = re.compile(FOREIGN_DISEASE.pattern + r"[A-Za-z0-9._-]{1,30}$", re.I)
 CURSOR = re.compile(r"^[A-Za-z0-9+/=_-]{1,200}$")
 
 #: Clinical stages, most advanced first (Open Targets enum strings).
