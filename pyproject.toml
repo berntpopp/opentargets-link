@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "opentargets-link"
-version = "0.2.0"
+version = "0.3.0"
 description = "MCP server for the Open Targets Platform: target tractability, ChEMBL drug and clinical candidates, disease-target associations and target-disease evidence via the live Open Targets GraphQL API (research use only)"
 readme = "README.md"
 license = { text = "MIT" }

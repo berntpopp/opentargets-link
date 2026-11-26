@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-26
+
+### Added
+
+- Paged tools (`get_drug_candidates`, `get_target_disease_evidence`, `search_disease_targets`) report `_meta.pagination` with `total_count`, `has_more` and
+  `next_cursor` (`null` where paging is by offset, which then also carries `next_offset`), as
+  Response-Envelope Standard v1 §5 asks. The top-level paging fields are unchanged.
+
 ## [0.2.0] - 2026-11-26
 
 ### Added

@@ -306,6 +306,13 @@ def build_arg_error_envelope(
 def as_result(payload: dict[str, Any], key: str) -> dict[str, Any]:
     """Publish payload field ``key`` as ``result`` (object) or ``results`` (array), v1 §1."""
     value = payload.pop(key)
+    if "truncated" in payload and "total" in payload:  # paged: Response-Envelope v1 section 5
+        payload.setdefault("_meta", {})["pagination"] = {
+            "total_count": payload["total"],
+            "has_more": payload["truncated"],
+            "next_cursor": payload.get("next_cursor"),  # null where paging is by offset
+            **({"next_offset": payload["next_offset"]} if "next_offset" in payload else {}),
+        }
     return {"results" if isinstance(value, list) else "result": value, **payload}
 
 
