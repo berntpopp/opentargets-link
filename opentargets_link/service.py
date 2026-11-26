@@ -12,11 +12,10 @@ import base64
 import json
 import re
 from collections import Counter
-from datetime import UTC, datetime
 from typing import Any
 
 from opentargets_link import queries as Q
-from opentargets_link.api.client import OpenTargetsClient
+from opentargets_link.api.client import OpenTargetsClient, retrieved_at
 from opentargets_link.datasources import ALLOWED, ZERO_WEIGHTS
 from opentargets_link.exceptions import (
     AmbiguousQueryError,
@@ -67,10 +66,6 @@ MONDO_HINT = (
 _FIELDS = {"target_id": "target", "disease_id": "disease", "size": "limit", "efo_ids": "disease"}
 
 
-def _now() -> str:
-    return datetime.now(UTC).isoformat(timespec="seconds").replace("+00:00", "Z")
-
-
 def _limit(limit: int, maximum: int, offset: int = 0) -> None:
     if not 1 <= limit <= maximum:
         raise InvalidInputError(f"`limit` must be 1-{maximum}.", field="limit")
@@ -118,7 +113,7 @@ class OpenTargetsService:
 
     async def _stamp(self, payload: dict[str, Any]) -> dict[str, Any]:
         payload["data_version"] = await self.release()
-        payload["retrieved_at"] = _now()
+        payload["retrieved_at"] = retrieved_at()
         payload["disclaimer"] = NOT_A_REPORT
         return payload
 

@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-26
+
+### Added
+
+- Response-Envelope Standard v1.2: every successful data result carries `_meta.source`,
+  `_meta.data_version` (the Open Targets data release, e.g. `26.09`) and `_meta.retrieved_at`
+  (UTC time of the oldest upstream fetch behind the result; a cache hit keeps the time of the
+  fetch that filled its entry).
+- Schema tests: every data tool result is validated against the vendored
+  `envelope-v1.2.schema.json` (genefoundry-envelope v1.2.0, sha256-pinned).
+
+### Changed
+
+- **Breaking:** the primary payload key is now `results` (`get_drug_candidates`,
+  `search_disease_targets`, `get_target_disease_evidence`) or `result` (`resolve_target`,
+  `get_target_tractability`), per Response-Envelope Standard v1 §1. It was `drug_candidates`,
+  `targets`, `evidence`, `target` (in `resolve_target`) and `tractability`.
+- Re-vendored `tests/conformance/behaviour.py` from genefoundry-router (v1.2 provenance check).
+
+### Deprecated
+
+- The top-level `data_version` and `retrieved_at` of a data result. Read them from `_meta`;
+  the top-level copies will be removed in the next minor release.
+
 ## [0.1.1] - 2026-11-20
 
 Fixes from an agent UX evaluation (Claude Code, Codex, Antigravity; five rounds, see

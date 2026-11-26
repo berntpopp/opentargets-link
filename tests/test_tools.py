@@ -32,7 +32,7 @@ async def test_registered_tools_match_capabilities_and_are_documented(facade: An
 async def test_braf_acceptance_path(facade: Any, call_tool: Any) -> None:
     """BRAF -> tractability (SM approved) -> melanoma drugs -> evidence without COSMIC rows."""
     found = await call_tool(facade, "resolve_target", {"query": "BRAF"})
-    assert found["success"] is True and found["target"]["id"] == "ENSG00000157764"
+    assert found["success"] is True and found["result"]["id"] == "ENSG00000157764"
     meta = found["_meta"]
     assert meta["source"] == "opentargets" and meta["unsafe_for_clinical_use"] is True
     assert meta["next_commands"][0] == {
@@ -40,15 +40,15 @@ async def test_braf_acceptance_path(facade: Any, call_tool: Any) -> None:
         "arguments": {"target": "ENSG00000157764"},
     }
     tract = await call_tool(facade, "get_target_tractability", {"target": "ENSG00000157764"})
-    assert "Approved Drug" in tract["tractability"]["SM"]["true"]
+    assert "Approved Drug" in tract["result"]["SM"]["true"]
     drugs = await call_tool(
         facade, "get_drug_candidates", {"target": "BRAF", "disease": "melanoma", "limit": 20}
     )
-    assert {"VEMURAFENIB", "DABRAFENIB"} <= {d["drug_name"] for d in drugs["drug_candidates"]}
+    assert {"VEMURAFENIB", "DABRAFENIB"} <= {d["drug_name"] for d in drugs["results"]}
     evidence = await call_tool(
         facade, "get_target_disease_evidence", {"target": "BRAF", "disease": "MONDO_0005105"}
     )
-    sources = {e["datasource_id"] for e in evidence["evidence"]}
+    sources = {e["datasource_id"] for e in evidence["results"]}
     assert "intogen" in sources and "cancer_gene_census" not in sources
     assert evidence["data_version"] == "26.09"
 
@@ -114,17 +114,15 @@ async def test_capabilities_and_diagnostics(facade: Any, call_tool: Any) -> None
 
 async def test_descriptions_name_only_returned_fields(facade: Any, call_tool: Any) -> None:
     """Contract truth: the fields a description promises are in the response."""
-    target = (await call_tool(facade, "resolve_target", {"query": "BRAF"}))["target"]
+    target = (await call_tool(facade, "resolve_target", {"query": "BRAF"}))["result"]
     assert {"id", "symbol", "name", "biotype", "location", "synonyms"} <= set(target)
     tract = await call_tool(facade, "get_target_tractability", {"target": "BRAF"})
-    assert {"tractability", "target_class"} <= set(tract)
-    drug = (await call_tool(facade, "get_drug_candidates", {"target": "BRAF"}))["drug_candidates"][
-        0
-    ]
+    assert {"result", "target_class"} <= set(tract)
+    drug = (await call_tool(facade, "get_drug_candidates", {"target": "BRAF"}))["results"][0]
     assert {"drug_id", "drug_name", "max_clinical_stage_for_target", "action_types"} <= set(drug)
     assert "diseases" in drug
     ranked = await call_tool(facade, "search_disease_targets", {"disease": "MONDO_0005105"})
-    assert {"targets", "total"} <= set(ranked) and "datasource_scores" in ranked["targets"][0]
+    assert {"results", "total"} <= set(ranked) and "datasource_scores" in ranked["results"][0]
 
 
 async def test_rejected_arguments_count_as_errors_in_diagnostics(facade: Any) -> None:

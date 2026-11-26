@@ -8,7 +8,8 @@ message.
 Every ``_meta`` (success AND error) carries ``tool``, ``request_id``, ``elapsed_ms``,
 ``source = "opentargets"``, ``capabilities_version``, ``next_commands`` and
 ``unsafe_for_clinical_use = True`` (the fleet-standard research-use disclaimer).
-Data provenance (catalog data_version, retrieved_at, licence) is in the payload.
+Data tools add ``data_version`` and ``retrieved_at`` (Response-Envelope v1.2) and publish
+their payload under ``result``/``results``; see ``mcp/tools/opentargets.py``.
 """
 
 from __future__ import annotations
@@ -300,6 +301,12 @@ def build_arg_error_envelope(
         "hint": signature,
         "_meta": meta,
     }
+
+
+def as_result(payload: dict[str, Any], key: str) -> dict[str, Any]:
+    """Publish payload field ``key`` as ``result`` (object) or ``results`` (array), v1 §1."""
+    value = payload.pop(key)
+    return {"results" if isinstance(value, list) else "result": value, **payload}
 
 
 def _stamp_capabilities_version(meta: dict[str, Any]) -> None:

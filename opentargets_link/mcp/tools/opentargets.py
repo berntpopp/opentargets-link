@@ -7,9 +7,10 @@ from typing import TYPE_CHECKING, Annotated, Any, Literal
 
 from pydantic import Field, StrictInt
 
+from opentargets_link.api.client import FETCH_TIMES
 from opentargets_link.datasources import Datasource
 from opentargets_link.mcp.annotations import READ_ONLY_OPEN_WORLD
-from opentargets_link.mcp.envelope import McpErrorContext, ToolReturn, run_mcp_tool
+from opentargets_link.mcp.envelope import McpErrorContext, ToolReturn, as_result, run_mcp_tool
 from opentargets_link.mcp.next_commands import cmd
 from opentargets_link.mcp.service_adapters import get_opentargets_service
 from opentargets_link.service import DEFAULT_LIMIT, DRUG_MAX_LIMIT, MAX_LIMIT
@@ -74,6 +75,16 @@ def _set(**values: Any) -> dict[str, Any]:
     return {k: v for k, v in values.items() if v is not None}
 
 
+#: The service payload field each tool publishes as ``result`` (object) or ``results`` (array).
+_PRIMARY = {
+    "resolve_target": "target",
+    "get_target_tractability": "tractability",
+    "get_drug_candidates": "drug_candidates",
+    "search_disease_targets": "targets",
+    "get_target_disease_evidence": "evidence",
+}
+
+
 async def _run(
     tool: str,
     args: dict[str, Any],
@@ -81,9 +92,15 @@ async def _run(
     steps: Callable[[dict[str, Any]], list[dict[str, Any]]],
 ) -> ToolReturn:
     async def call() -> dict[str, Any]:
+        FETCH_TIMES.set([])
         payload = await fetch()
-        payload["_meta"] = {"next_commands": steps(payload)}
-        return payload
+        payload["_meta"] = {
+            "next_commands": steps(payload),
+            # Response-Envelope v1.2 provenance; the top-level copies are deprecated.
+            "data_version": payload["data_version"],
+            "retrieved_at": payload["retrieved_at"],
+        }
+        return as_result(payload, _PRIMARY[tool])
 
     return await run_mcp_tool(tool, call, context=McpErrorContext(tool, arguments=args))
 
