@@ -11,7 +11,7 @@ from opentargets_link.api.client import FETCH_TIMES
 from opentargets_link.datasources import Datasource
 from opentargets_link.mcp.annotations import READ_ONLY_OPEN_WORLD
 from opentargets_link.mcp.envelope import McpErrorContext, ToolReturn, as_result, run_mcp_tool
-from opentargets_link.mcp.next_commands import cmd
+from opentargets_link.mcp.next_commands import cmd, safe_echo
 from opentargets_link.mcp.service_adapters import get_opentargets_service
 from opentargets_link.service import DEFAULT_LIMIT, DRUG_MAX_LIMIT, MAX_LIMIT
 
@@ -106,6 +106,8 @@ async def _run(
 
 
 def _next(p: dict[str, Any], tool: str, args: dict[str, Any]) -> list[dict[str, Any]]:
+    if not all(map(safe_echo, args.values())):  # never repeat unsafe caller text (TXT-04)
+        return []
     if p.get("next_offset") is not None:
         return [cmd(tool, **{**args, "offset": p["next_offset"]})]
     if p.get("next_cursor"):

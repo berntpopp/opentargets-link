@@ -2,12 +2,20 @@
 
 from __future__ import annotations
 
+import unicodedata
 from typing import Any
 
 
 def cmd(tool: str, **arguments: Any) -> dict[str, Any]:
     """One ready-to-call next step."""
     return {"tool": tool, "arguments": arguments}
+
+
+def safe_echo(value: Any) -> bool:
+    """True if a caller value may be repeated in a page/widen step (GTS-CORE-TXT-04):
+    at most 200 characters and no control/format code points (Unicode Cc/Cf)."""
+    text = str(value)
+    return len(text) <= 200 and not any(unicodedata.category(c) in ("Cc", "Cf") for c in text)
 
 
 def default_error_next_commands(

@@ -28,6 +28,7 @@ from opentargets_link.shaping import (
     CURSOR,
     ENSEMBL_GENE,
     FOREIGN_DISEASE,
+    FOREIGN_DISEASE_ID,
     FOREIGN_GENE,
     HGNC_ID,
     NO_DRUGS,
@@ -147,7 +148,6 @@ class OpenTargetsService:
                 field=field,
                 allowed_values=GENE_FORMS,
                 hint=HGNC_HINT,
-                next_commands=[cmd("hgnc_resolve_symbol", query=term[:60])],
             )
         hits = await self._map(term, "target")
         exact = [h for h in hits if str(h.get("name", "")).upper() == term.upper()]
@@ -178,7 +178,12 @@ class OpenTargetsService:
                 field="disease",
                 allowed_values=DISEASE_FORMS,
                 hint=MONDO_HINT,
-                next_commands=[cmd("mondo_resolve_disease", query=term)],
+                # forward only a well-formed CURIE, never free text (GTS-CORE-TXT-04)
+                next_commands=(
+                    [cmd("mondo_resolve_disease", query=term)]
+                    if FOREIGN_DISEASE_ID.fullmatch(term)
+                    else None
+                ),
                 recovery_action="reformulate_input",
             )
         disease_id = disease_curie(term)
@@ -208,7 +213,6 @@ class OpenTargetsService:
             "No Open Targets disease matches `disease`.",
             field="disease",
             hint=MONDO_HINT,
-            next_commands=[cmd("mondo_resolve_disease", query=term)],
         )
 
     @staticmethod
